@@ -2,6 +2,7 @@
 namespace BookieWookie.API.Entities
 {
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Options;
     using System.Collections.Generic;
 
     public class DbContextClass : DbContext
