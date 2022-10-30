@@ -23,7 +23,7 @@
             //TODO: Use secure authentication //
             if (user.UserName == "test" && user.Password == "password")
             {
-                var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(ConfigurationManager.AppSetting["JWT:Secret"]));
+                var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(API.ConfigurationManager.AppSetting["JWT:Secret"]));
                 var signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
                 var tokeOptions = new JwtSecurityToken(
                     issuer: API.ConfigurationManager.AppSetting["JWT:ValidIssuer"],
