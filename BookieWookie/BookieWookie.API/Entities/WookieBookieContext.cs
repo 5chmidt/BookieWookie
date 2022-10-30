@@ -11,6 +11,9 @@ namespace BookieWookie.API.Entities
         {
             Configuration = configuration;
         }
+
+        public DbSet<User> Users { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
             options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
