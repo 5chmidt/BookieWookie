@@ -1,5 +1,5 @@
 ﻿
-namespace WebAPI.Data
+namespace BookieWookie.API.Entities
 {
     using Microsoft.EntityFrameworkCore;
     using System.Collections.Generic;
