@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace BookieWookie.API.Migrations
 {
-    [DbContext(typeof(DbContextClass))]
+    [DbContext(typeof(WookieBookieContext))]
     partial class DbContextClassModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
