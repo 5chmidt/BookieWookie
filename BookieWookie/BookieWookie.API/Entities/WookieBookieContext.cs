@@ -5,10 +5,10 @@ namespace BookieWookie.API.Entities
     using Microsoft.Extensions.Options;
     using System.Collections.Generic;
 
-    public class DbContextClass : DbContext
+    public class WookieBookieContext : DbContext
     {
         protected readonly IConfiguration Configuration;
-        public DbContextClass(IConfiguration configuration)
+        public WookieBookieContext(IConfiguration configuration)
         {
             Configuration = configuration;
         }
