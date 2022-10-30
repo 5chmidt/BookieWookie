@@ -1,6 +1,6 @@
 ﻿namespace BookieWookie.API.Models
 {
-    public class JWTTokenResponce
+    public class JWTTokenResponse
     {
         public string? Token { get; set; }
     }
