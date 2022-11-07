@@ -17,7 +17,8 @@
     {
         JWTTokenResponse Authenticate(AuthenticateRequest model);
         JWTTokenResponse CreateUser(UserRequest model);
-        UserRequest UpdateUser(UserRequest model);
+        User DeleteUser(int id);
+        User UpdateUser(UserRequest model);
         IEnumerable<User> GetAll();
         User GetById(int id);
     }
@@ -25,7 +26,6 @@
     public class UserService : IUserService
     {
         private readonly IConfiguration Configuration;
-
 
         public UserService(IConfiguration configuration)
         {
@@ -54,7 +54,12 @@
                 return null;
             }
 
-            Claim[] claims = new Claim[0];
+            Claim[] claims = new Claim[]
+            {
+                new Claim(nameof(User.Id), user.Id.ToString(), ClaimValueTypes.String),
+                new Claim(nameof(User.Username), user.Username, ClaimValueTypes.String),
+            };
+
             return IssueToken(claims);
         }
 
@@ -66,6 +71,11 @@
                 if (db.Users.Where(u => u.Username == model.Username).Count() > 0)
                 {
                     throw new AuthenticationException($"Username '{model.Username}' already exists");
+                }
+
+                if (model.Password.Length < 8)
+                {
+                    throw new AuthenticationException($"Password must be at least 8 charectors long.");
                 }
 
                 user.Username = model.Username;
@@ -81,13 +91,13 @@
 
             Claim[] claims = new Claim[]
             {
-                new Claim(nameof(User.Id), user.Id.ToString()),
-                new Claim(nameof(User.Username), user.Username),
+                new Claim(nameof(User.Id), user.Id.ToString(), ClaimValueTypes.String),
+                new Claim(nameof(User.Username), user.Username, ClaimValueTypes.String),
             };
             return IssueToken(claims);
         }
 
-        public UserRequest UpdateUser(UserRequest model)
+        public User UpdateUser(UserRequest model)
         {
             var user = new User();
             using (var db = new WookieBookieContext(this.Configuration))
@@ -108,8 +118,25 @@
                 db.SaveChanges();
             }
 
-            Claim[] claims = new Claim[0];
-            return IssueToken(claims);
+            return user;
+        }
+
+        public User DeleteUser(int id)
+        {
+            var user = new User();
+            using (var db = new WookieBookieContext(this.Configuration))
+            {
+                user = db.Users.SingleOrDefault(u => u.Id == id);
+                if (user == null)
+                {
+                    throw new AuthenticationException($"User ID: {id} does not exist.");
+                }
+
+                db.Users.Remove(user);
+                db.SaveChanges();
+            }
+
+            return user;
         }
 
         public IEnumerable<User> GetAll()
