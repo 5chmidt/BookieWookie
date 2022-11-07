@@ -5,6 +5,8 @@
     using BookieWookie.API.Helpers;
     using BookieWookie.API.Models;
     using BookieWookie.API.Services;
+    using System.Runtime.CompilerServices;
+    using BookieWookie.API.Authorization;
 
     [ApiController]
     [Route("[controller]")]
@@ -49,13 +51,14 @@
             return Ok(responce);
         }
 
-        [Authorize]
+        [AuthorizeOwner]
         [HttpPost("update")]
         public IActionResult Update(UserRequest model)
         {
+            Entities.User user;
             try
             {
-                model = _userService.UpdateUser(model);
+                user = _userService.UpdateUser(model);
             }
             catch (AuthenticationException ex)
             {
@@ -65,8 +68,25 @@
             return Ok(model);
         }
 
-        [Authorize]
-        [HttpGet]
+        [AuthorizeOwner]
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
+        {
+            Entities.User model;
+            try
+            {
+                model = _userService.DeleteUser(id);
+            }
+            catch (AuthenticationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+            return Ok(model);
+        }
+
+        [AuthorizeOwner]
+        [HttpGet("all")]
         public IActionResult GetAll()
         {
             var users = _userService.GetAll();
