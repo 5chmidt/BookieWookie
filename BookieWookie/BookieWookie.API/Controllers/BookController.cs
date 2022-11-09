@@ -34,7 +34,7 @@ namespace BookieWookie.API.Controllers
             Entities.Book book;
             try
             {
-                book = _bookService.Create(model, this.UserId);
+                book = _bookService.Create(model);
             }
             catch (AuthenticationException ex)
             {
@@ -59,8 +59,8 @@ namespace BookieWookie.API.Controllers
         private int UserId { 
             get
             {
-                var user = (Entities.User)HttpContext.Items["User"];
-                return Convert.ToInt32(user.Id);
+                var user = (Entities.User?)HttpContext.Items["User"];
+                return user == null ? 0 : Convert.ToInt32(user.Id);
             } 
         }
     }

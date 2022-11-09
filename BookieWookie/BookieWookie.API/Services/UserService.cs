@@ -151,7 +151,7 @@
         {
             using (var db = new WookieBookieContext(this.Configuration))
             {
-                return db.Users.FirstOrDefault(u => u.Id == id);
+                return db.Users.Single(u => u.Id == id);
             }
         }
 

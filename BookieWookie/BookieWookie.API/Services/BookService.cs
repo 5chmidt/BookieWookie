@@ -6,7 +6,7 @@ namespace BookieWookie.API.Services
 {
     public interface IBookService
     {
-        Entities.Book Create(CreateBookRequest request, int userId);
+        Entities.Book Create(CreateBookRequest request);
         Entities.Book Update();
         Entities.Book Delete();
         Entities.Book Get();
@@ -24,14 +24,13 @@ namespace BookieWookie.API.Services
         }
 
         [AuthorizeOwner]
-        public Book Create(CreateBookRequest request, int userId)
+        public Book Create(CreateBookRequest request)
         {
             var book = new Book()
             {
                 Title = request.Title,
                 Description = request.Description,
                 CreatedAt = DateTime.Now,
-                AuthorId = userId,
             };
 
             using (var db = new WookieBookieContext(this.Configuration))
