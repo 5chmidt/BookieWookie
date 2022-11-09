@@ -10,13 +10,15 @@ namespace BookieWookie.API.Controllers
     [Route("[controller]")]
     public class BookController : Controller
     {
+        private IUserService _userService;
         private IBookService _bookService;
         private IConfiguration _configuration;
 
-        public BookController(IBookService bookService, IConfiguration configuration)
+        public BookController(IBookService bookService, IConfiguration configuration, IUserService userService)
         {
             _bookService = bookService;
             _configuration = configuration;
+            _userService = userService;
         }
 
         [HttpGet("get")]
@@ -25,13 +27,14 @@ namespace BookieWookie.API.Controllers
             throw new NotImplementedException();
         }
 
+        [AuthorizeOwner]
         [HttpPost("create")]
         public IActionResult Create(CreateBookRequest model)
         {
             Entities.Book book;
             try
             {
-                book = _bookService.Create(model);
+                book = _bookService.Create(model, this.UserId);
             }
             catch (AuthenticationException ex)
             {
@@ -51,6 +54,14 @@ namespace BookieWookie.API.Controllers
         public IActionResult Delete(int id)
         {
             throw new NotImplementedException();
+        }
+
+        private int UserId { 
+            get
+            {
+                var user = (Entities.User)HttpContext.Items["User"];
+                return Convert.ToInt32(user.Id);
+            } 
         }
     }
 }

@@ -6,7 +6,7 @@ namespace BookieWookie.API.Services
 {
     public interface IBookService
     {
-        Entities.Book Create(CreateBookRequest request);
+        Entities.Book Create(CreateBookRequest request, int userId);
         Entities.Book Update();
         Entities.Book Delete();
         Entities.Book Get();
@@ -24,16 +24,24 @@ namespace BookieWookie.API.Services
         }
 
         [AuthorizeOwner]
-        public Book Create(CreateBookRequest request)
+        public Book Create(CreateBookRequest request, int userId)
         {
             var book = new Book()
             {
                 Title = request.Title,
                 Description = request.Description,
+                CreatedAt = DateTime.Now,
+                AuthorId = userId,
             };
 
             using (var db = new WookieBookieContext(this.Configuration))
             {
+                if (db.Books.Where(b => b.Title == request.Title).Any())
+                {
+                    string msg = $"Books cannot share titles, '{request.Title}' already exists.";
+                    throw new InvalidDataException(msg);
+                }
+
                 db.Books.Add(book);
                 db.SaveChanges();
             }
