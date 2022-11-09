@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace BookieWookie.API.Authorization
 {
@@ -6,6 +7,7 @@ namespace BookieWookie.API.Authorization
     {
         [Required] 
         [MaxLength(40)] //Guid string
+        [JsonIgnore]
         public string OwnedBy { get; private set; }
 
         public void SetOwnedBy(string protectKey)

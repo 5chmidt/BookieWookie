@@ -43,7 +43,7 @@ namespace BookieWookie.API.Entities
                 modelBuilder.Entity(entityOwnedBy.ClrType).HasIndex(nameof(IOwnedBy.OwnedBy));
             }
 
-            modelBuilder.Entity<Book>().HasQueryFilter(x => x.OwnedBy == _userId);
+            //modelBuilder.Entity<Book>().HasQueryFilter(x => x.OwnedBy == _userId);
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)

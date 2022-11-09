@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace BookieWookie.API.Entities
 {
-    public class Book : OwnedByBase
+    public class Book //: OwnedByBase
     {
         public int Id { get; set; }
 
@@ -13,8 +13,9 @@ namespace BookieWookie.API.Entities
         [Required]
         public DateTime CreatedAt { get; set; }
 
-        public int Title { get; set; }
+        [Required]
+        public string Title { get; set; }
 
-        public string Description { get; set; }
+        public string? Description { get; set; }
     }
 }
