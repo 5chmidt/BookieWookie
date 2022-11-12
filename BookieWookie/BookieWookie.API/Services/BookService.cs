@@ -6,10 +6,10 @@ namespace BookieWookie.API.Services
 {
     public interface IBookService
     {
-        Entities.Book Create(CreateBookRequest request);
-        Entities.Book Update();
-        Entities.Book Delete();
-        Entities.Book Get();
+        Book Create(CreateBookRequest request, int userId);
+        Book Update();
+        Book Delete();
+        IEnumerable<Book> Get();
     }
 
 
@@ -23,14 +23,14 @@ namespace BookieWookie.API.Services
             this.Configuration = configuration;
         }
 
-        [AuthorizeOwner]
-        public Book Create(CreateBookRequest request)
+        public Book Create(CreateBookRequest request, int userId)
         {
             var book = new Book()
             {
                 Title = request.Title,
                 Description = request.Description,
                 CreatedAt = DateTime.Now,
+                AuthorId = userId,
             };
 
             using (var db = new WookieBookieContext(this.Configuration))
@@ -53,9 +53,12 @@ namespace BookieWookie.API.Services
             throw new NotImplementedException();
         }
 
-        public Book Get()
+        public IEnumerable<Book> Get()
         {
-            throw new NotImplementedException();
+            using (var db = new WookieBookieContext(this.Configuration))
+            {
+                return db.Books.ToArray();
+            }
         }
 
         public Book Update()

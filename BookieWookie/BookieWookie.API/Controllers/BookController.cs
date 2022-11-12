@@ -7,6 +7,7 @@ using System.Security.Authentication;
 
 namespace BookieWookie.API.Controllers
 {
+    [ApiController]
     [Route("[controller]")]
     public class BookController : Controller
     {
@@ -21,10 +22,21 @@ namespace BookieWookie.API.Controllers
             _userService = userService;
         }
 
+        [AuthorizeOwner]
         [HttpGet("get")]
         public IActionResult Get()
         {
-            throw new NotImplementedException();
+            IEnumerable<Entities.Book> books;
+            try
+            {
+                books = _bookService.Get();
+            }
+            catch (AuthenticationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+            return Ok(books);
         }
 
         [AuthorizeOwner]
@@ -34,7 +46,7 @@ namespace BookieWookie.API.Controllers
             Entities.Book book;
             try
             {
-                book = _bookService.Create(model);
+                book = _bookService.Create(model, UserId);
             }
             catch (AuthenticationException ex)
             {
@@ -44,6 +56,7 @@ namespace BookieWookie.API.Controllers
             return Ok(book);
         }
 
+        [AuthorizeOwner]
         [HttpPost("update")]
         public IActionResult Update()
         {
