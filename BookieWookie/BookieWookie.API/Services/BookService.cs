@@ -1,14 +1,15 @@
 ﻿using BookieWookie.API.Entities;
 using BookieWookie.API.Helpers;
 using BookieWookie.API.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace BookieWookie.API.Services
 {
     public interface IBookService
     {
-        Book Create(CreateBookRequest request, int userId);
+        Task<Book> Create(CreateBookRequest request, int userId);
         Book Update();
-        Book Delete();
+        Task<Book> Delete(int bookId, int userId);
         IEnumerable<Book> Get();
     }
 
@@ -23,7 +24,7 @@ namespace BookieWookie.API.Services
             this.Configuration = configuration;
         }
 
-        public Book Create(CreateBookRequest request, int userId)
+        public async Task<Book> Create(CreateBookRequest request, int userId)
         {
             var book = new Book()
             {
@@ -35,22 +36,33 @@ namespace BookieWookie.API.Services
 
             using (var db = new WookieBookieContext(this.Configuration))
             {
-                if (db.Books.Where(b => b.Title == request.Title).Any())
+                if (await db.Books.Where(b => b.Title == request.Title).AnyAsync())
                 {
                     string msg = $"Books cannot share titles, '{request.Title}' already exists.";
                     throw new InvalidDataException(msg);
                 }
 
                 db.Books.Add(book);
-                db.SaveChanges();
+                await db.SaveChangesAsync();
             }
 
             return book;
         }
 
-        public Book Delete()
+        public async Task<Book> Delete(int bookId, int userId)
         {
-            throw new NotImplementedException();
+            using (var db = new WookieBookieContext(this.Configuration))
+            {
+                Book book = await db.Books.SingleAsync(b => b.Id == bookId);
+                if (book.AuthorId != userId)
+                {
+                    throw new UnauthorizedAccessException($"Authors can only remove their own books.");
+                }
+
+                db.Books.Remove(book);
+                await db.SaveChangesAsync();
+                return book;
+            }
         }
 
         public IEnumerable<Book> Get()

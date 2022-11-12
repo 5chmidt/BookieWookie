@@ -41,12 +41,12 @@ namespace BookieWookie.API.Controllers
 
         [AuthorizeOwner]
         [HttpPost("create")]
-        public IActionResult Create(CreateBookRequest model)
+        public async Task<IActionResult> Create(CreateBookRequest model)
         {
             Entities.Book book;
             try
             {
-                book = _bookService.Create(model, UserId);
+                book = await _bookService.Create(model, UserId);
             }
             catch (AuthenticationException ex)
             {
@@ -63,10 +63,25 @@ namespace BookieWookie.API.Controllers
             throw new NotImplementedException();
         }
 
-        [HttpDelete("delete")]
-        public IActionResult Delete(int id)
+        [AuthorizeOwner]
+        [HttpDelete("{bookId}")]
+        public async Task<IActionResult> Delete(int bookId)
         {
-            throw new NotImplementedException();
+            Entities.Book book;
+            try
+            {
+                book = await _bookService.Delete(bookId, UserId);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+            return Ok(book);
         }
 
         private int UserId { 
