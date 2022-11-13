@@ -68,7 +68,7 @@
         }
 
         /// <summary>
-        /// Update user profile information, (cannot update username).
+        /// Update user profile information.
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>

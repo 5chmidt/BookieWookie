@@ -5,6 +5,7 @@ namespace BookieWookie.API.Services
     using System.Text;
     using Konscious.Security.Cryptography;
     using BookieWookie.API.Helpers;
+    using System.Security.Authentication;
 
     public interface IAuthenticationService
     {
@@ -68,6 +69,26 @@ namespace BookieWookie.API.Services
         {
             var newHash = HashPassword(password, salt);
             return hash.SequenceEqual(newHash);
+        }
+
+        /// <summary>
+        /// Check user password meets requirements.
+        /// </summary>
+        /// <param name="password">Password user is attmepting to set.</param>
+        /// <returns>True if successful, else throws an exception.</returns>
+        /// <exception cref="AuthenticationException"></exception>
+        public static bool CheckPasswordRequirements(string? password)
+        {
+            //TODO: move to app.settings //
+            int minLength = 8;
+
+            // set the most basic password of requirements //
+            if (password == null || password.Length < minLength)
+            {
+                throw new AuthenticationException($"Password must be at least 8 charectors long.");
+            }
+
+            return true;
         }
     }
 }

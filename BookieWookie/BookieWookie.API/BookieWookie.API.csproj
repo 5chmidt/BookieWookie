@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Configurations>Development;Release;Staging</Configurations>
     <UserSecretsId>96586bbe-175f-4da9-b84b-f7576b001b6c</UserSecretsId>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

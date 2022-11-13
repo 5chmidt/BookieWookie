@@ -29,7 +29,7 @@
             {
                 var tokenHandler = new JwtSecurityTokenHandler();
                 var key = Encoding.ASCII.GetBytes(
-                    API.ConfigurationManager.AppSetting["JWT:Secret"]);
+                    ConfigurationManager.AppSetting["JWT:Secret"]);
                 var parameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,

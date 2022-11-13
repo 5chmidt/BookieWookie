@@ -9,6 +9,7 @@
     using Microsoft.Extensions.Options;
     using Microsoft.IdentityModel.Tokens;
     using System.IdentityModel.Tokens.Jwt;
+    using System.Reflection;
     using System.Security;
     using System.Security.Authentication;
     using System.Security.Claims;
@@ -76,11 +77,8 @@
                     throw new AuthenticationException($"Username '{model.Username}' already exists");
                 }
 
-                // set the most basic password of requirements //
-                if (model.Password == null || model.Password.Length < 8)
-                {
-                    throw new AuthenticationException($"Password must be at least 8 charectors long.");
-                }
+                // throw exception if checks do not pass //
+                AuthenticationService.CheckPasswordRequirements(model.Password);
 
                 user.Username = model.Username;
                 var authService = new AuthenticationService();
@@ -108,19 +106,59 @@
             var user = new User();
             using (var db = new BookieWookieContext(this.Configuration))
             {
-                user = db.Users.SingleOrDefault(u => u.Username == model.Username);
+                user = db.Users.SingleOrDefault(u => u.UserId == model.UserId);
                 if (user == null)
                 {
                     throw new AuthenticationException($"Username '{model.Username}' does not exist.");
                 }
 
-                user.Username = model.Username;
-                var authService = new AuthenticationService();
-                user.FirstName = model.FirstName;
-                user.LastName = model.LastName;
-                user.Pseudonym = model.Pseudonym;
-                user.Salt = authService.CreateSalt();
-                user.Hash = authService.HashPassword(model.Password, user.Salt);
+                bool updated = false;
+                foreach (PropertyInfo modelProperty in model.GetType().GetRuntimeProperties())
+                {
+                    // cannot update userID //
+                    if (modelProperty.Name == nameof(model.UserId))
+                    {
+                        continue;
+                    }
+
+                    object? value = modelProperty.GetValue(model, null);
+                    if (value == null)
+                    {
+                        continue;
+                    }
+
+                    var userProperty = user.GetType().GetProperty(modelProperty.Name);
+                    if (userProperty == null || userProperty.PropertyType != modelProperty.PropertyType)
+                    {
+                        continue;
+                    }
+
+                    if (modelProperty.Name == nameof(model.Password))
+                    {
+                        // special handling for password updates //
+                        var authService = new AuthenticationService();
+                        user.Salt = authService.CreateSalt();
+                        user.Hash = authService.HashPassword(model.Password, user.Salt);
+                    }
+                    else if (modelProperty.Name == nameof(model.Username))
+                    {
+                        // check that new username is not already in use //
+                        if (db.Users.Where(u => u.Username == model.Username).Count() > 0)
+                        {
+                            throw new AuthenticationException($"Username '{model.Username}' already exists");
+                        }
+
+                        userProperty.SetValue(model.Username, user);
+                    }
+                    else
+                    {
+                        // normal property update //
+                        userProperty.SetValue(modelProperty.GetValue(model), user);
+                    }
+
+                    updated = true;
+                }
+
                 db.SaveChanges();
             }
 
