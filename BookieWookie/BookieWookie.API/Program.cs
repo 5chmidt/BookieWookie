@@ -1,7 +1,6 @@
 using BookieWookie.API.Services;
-using BookieWookie.Helpers;
+using BookieWookie.API.Helpers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 

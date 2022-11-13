@@ -9,6 +9,7 @@
     using Microsoft.Extensions.Options;
     using Microsoft.IdentityModel.Tokens;
     using System.IdentityModel.Tokens.Jwt;
+    using System.Security;
     using System.Security.Authentication;
     using System.Security.Claims;
     using System.Text;
@@ -36,7 +37,7 @@
         {
             // find user in database //
             User user;
-            using (var db = new WookieBookieContext(this.Configuration))
+            using (var db = new BookieWookieContext(this.Configuration))
             {
                 user = db.Users.SingleOrDefault(x => x.Username == model.Username);
             }
@@ -53,11 +54,13 @@
             {
                 return null;
             }
+            var permission = Authorization.Authorize.GetPermissionLevel(user);
 
             Claim[] claims = new Claim[]
             {
                 new Claim(nameof(User.UserId), user.UserId.ToString(), ClaimValueTypes.String),
                 new Claim(nameof(User.Username), user.Username, ClaimValueTypes.String),
+                new Claim(nameof(Authorization.PermissionLevel), permission.ToString(), ClaimValueTypes.String),
             };
 
             return IssueToken(claims);
@@ -66,14 +69,15 @@
         public JWTTokenResponse CreateUser(UserRequest model)
         {
             var user = new User();
-            using (var db = new WookieBookieContext(this.Configuration))
+            using (var db = new BookieWookieContext(this.Configuration))
             {
                 if (db.Users.Where(u => u.Username == model.Username).Count() > 0)
                 {
                     throw new AuthenticationException($"Username '{model.Username}' already exists");
                 }
 
-                if (model.Password.Length < 8)
+                // set the most basic password of requirements //
+                if (model.Password == null || model.Password.Length < 8)
                 {
                     throw new AuthenticationException($"Password must be at least 8 charectors long.");
                 }
@@ -89,10 +93,12 @@
                 db.SaveChanges();
             }
 
+            var permission = Authorization.Authorize.GetPermissionLevel(user);
             Claim[] claims = new Claim[]
             {
                 new Claim(nameof(User.UserId), user.UserId.ToString(), ClaimValueTypes.String),
                 new Claim(nameof(User.Username), user.Username, ClaimValueTypes.String),
+                new Claim(nameof(Authorization.PermissionLevel), permission.ToString(), ClaimValueTypes.String),
             };
             return IssueToken(claims);
         }
@@ -100,7 +106,7 @@
         public User UpdateUser(UserRequest model)
         {
             var user = new User();
-            using (var db = new WookieBookieContext(this.Configuration))
+            using (var db = new BookieWookieContext(this.Configuration))
             {
                 user = db.Users.SingleOrDefault(u => u.Username == model.Username);
                 if (user == null)
@@ -124,7 +130,7 @@
         public User DeleteUser(int id)
         {
             var user = new User();
-            using (var db = new WookieBookieContext(this.Configuration))
+            using (var db = new BookieWookieContext(this.Configuration))
             {
                 user = db.Users.SingleOrDefault(u => u.UserId == id);
                 if (user == null)
@@ -141,7 +147,7 @@
 
         public IEnumerable<User> GetAll()
         {
-            using (var db = new WookieBookieContext(this.Configuration))
+            using (var db = new BookieWookieContext(this.Configuration))
             {
                 return db.Users.ToArray();
             }
@@ -149,7 +155,7 @@
 
         public User GetById(int id)
         {
-            using (var db = new WookieBookieContext(this.Configuration))
+            using (var db = new BookieWookieContext(this.Configuration))
             {
                 return db.Users.Single(u => u.UserId == id);
             }

@@ -37,7 +37,7 @@ namespace BookieWookie.API.Services
                 UserId = userId,
             };
 
-            using (var db = new WookieBookieContext(this.Configuration))
+            using (var db = new BookieWookieContext(this.Configuration))
             {
                 if (await db.Books.Where(b => b.Title == request.Title).AnyAsync())
                 {
@@ -54,7 +54,7 @@ namespace BookieWookie.API.Services
 
         public async Task<Book> Delete(int bookId, int userId)
         {
-            using (var db = new WookieBookieContext(this.Configuration))
+            using (var db = new BookieWookieContext(this.Configuration))
             {
                 Book book = await db.Books.SingleAsync(b => b.BookId == bookId);
                 if (book.UserId != userId)
@@ -70,7 +70,7 @@ namespace BookieWookie.API.Services
 
         public async Task<IEnumerable<Book>> Get(BookParameters bookParams)
         {
-            using (var db = new WookieBookieContext(this.Configuration))
+            using (var db = new BookieWookieContext(this.Configuration))
             {
                 var books = db.Books.AsQueryable();
                 foreach (PropertyInfo property in bookParams.GetType().GetRuntimeProperties())
@@ -134,7 +134,7 @@ namespace BookieWookie.API.Services
 
         public async Task<Book> Update(Book book, int userId)
         {
-            using (var db = new WookieBookieContext(this.Configuration))
+            using (var db = new BookieWookieContext(this.Configuration))
             {
                 if (book.UserId != userId)
                 {

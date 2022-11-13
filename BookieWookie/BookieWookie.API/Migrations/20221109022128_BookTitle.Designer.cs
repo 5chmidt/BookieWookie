@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace BookieWookie.API.Migrations
 {
-    [DbContext(typeof(WookieBookieContext))]
+    [DbContext(typeof(BookieWookieContext))]
     [Migration("20221109022128_BookTitle")]
     partial class BookTitle
     {

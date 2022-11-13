@@ -1,4 +1,4 @@
-﻿namespace BookieWookie.Helpers
+﻿namespace BookieWookie.API.Helpers
 {
     using BookieWookie.API.Services;
     using Microsoft.IdentityModel.Tokens;

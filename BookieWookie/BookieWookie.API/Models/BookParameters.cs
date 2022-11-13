@@ -14,7 +14,7 @@ namespace BookieWookie.API.Models
 
         public string? AuthorLastName { get; set; }
 
-        public DateOnly? CreatedOn { get; set; }
+        public DateTime? CreatedOn { get; set; }
 
         public DateTime? CreatedAfter { get; set; }
 
