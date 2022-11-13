@@ -70,11 +70,9 @@ namespace BookieWookie.API.Services
 
         public async Task<IEnumerable<Book>> Get(BookParameters bookParams)
         {
-
-
             using (var db = new WookieBookieContext(this.Configuration))
             {
-                var books = db.Books;
+                var books = db.Books.AsEnumerable();
                 foreach (PropertyInfo property in bookParams.GetType().GetRuntimeProperties())
                 {
                     object? value = property.GetValue(bookParams, null);
@@ -86,15 +84,47 @@ namespace BookieWookie.API.Services
                     // query mapping //
                     if (property.Name == nameof(BookParameters.Id))
                     {
-                        books.Where(b => b.BookId == (int)value);
+                        books = books.Where(b => b.BookId == (int)value);
                     }
                     else if(property.Name == nameof(BookParameters.AuthorId))
                     {
-                        books.Where(b => b.UserId == (int)value);
+                        books = books.Where(b => b.UserId == (int)value);
                     }
-                    else if(property.Name == nameof(BookParameters.Title))
+                    else if (property.Name == nameof(BookParameters.TitleContains))
                     {
-                        books.Where(b => b.Title.Contains((string)value));
+                        books = books.Where(b => b.Title.Contains((string)value));
+                    }
+                    else if(property.Name == nameof(BookParameters.TitleEquals))
+                    {
+                        books = books.Where(b => b.Title == (string)value);
+                    }
+                    else if (property.Name == nameof(BookParameters.Description))
+                    {
+                        books = books.Where(b => b.Description.Contains((string)value));
+                    }
+                    else if (property.Name == nameof(BookParameters.AuthorFirstName))
+                    {
+                        books = books.Where(b => b.User.FirstName == (string)value);
+                    }
+                    else if (property.Name == nameof(BookParameters.AuthorLastName))
+                    {
+                        books = books.Where(b => b.User.LastName == (string)value);
+                    }
+                    else if (property.Name == nameof(BookParameters.AuthorPseudonym))
+                    {
+                        books = books.Where(b => b.User.Pseudonym == (string)value);
+                    }
+                    else if (property.Name == nameof(BookParameters.CreateBefore))
+                    {
+                        books = books.Where(b => b.CreatedAt <= (DateTime)value);
+                    }
+                    else if (property.Name == nameof(BookParameters.CreatedAfter))
+                    {
+                        books = books.Where(b => b.CreatedAt >= (DateTime)value);
+                    }
+                    else if (property.Name == nameof(BookParameters.CreatedOn))
+                    {
+                        books = books.Where(b => b.CreatedAt.Date == (DateTime)value);
                     }
                 }
 

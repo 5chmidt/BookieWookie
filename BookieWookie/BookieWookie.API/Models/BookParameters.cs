@@ -20,7 +20,9 @@ namespace BookieWookie.API.Models
 
         public DateTime? CreateBefore { get; set; }
 
-        public string? Title { get; set; }
+        public string? TitleEquals { get; set; }
+
+        public string? TitleContains { get; set; }
 
         public string? Description { get; set; }
     }
