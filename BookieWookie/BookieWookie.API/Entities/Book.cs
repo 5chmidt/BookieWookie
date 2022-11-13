@@ -1,23 +1,45 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 
 namespace BookieWookie.API.Entities
 {
+    /// <summary>
+    /// Entity framework class for book table.
+    /// </summary>
     public class Book
     {
+        /// <summary>
+        /// Gets or sets the integer, primary key for book table.
+        /// </summary>
         [Key]
         public int BookId { get; set; }
 
-        [Required]
+        /// <summary>
+        /// Gets or sets the date-time when the book added to the database.
+        /// </summary>
+        [Required, NotNull]
         public DateTime CreatedAt { get; set; }
 
-        [Required]
+        /// <summary>
+        /// Gets or sets the book's title.
+        /// </summary>
+        [Required, NotNull]
         public string Title { get; set; }
 
+        /// <summary>
+        /// Gets or sets the book's content description.
+        /// </summary>
         public string? Description { get; set; }
 
+        /// <summary>
+        /// Gets or sets the UserId to link the book with the author's user.
+        /// </summary>
         [Required]
         public int UserId { get; set; }
 
+        /// <summary>
+        /// Gets or sets the User object for the author.
+        /// </summary>
         public User User { get; set; }
     }
 }

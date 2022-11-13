@@ -2,6 +2,7 @@
 {
     using Microsoft.EntityFrameworkCore;
     using System.ComponentModel.DataAnnotations;
+    using System.Diagnostics.CodeAnalysis;
     using System.Text.Json.Serialization;
 
     public class User
@@ -14,7 +15,7 @@
 
         public string? LastName { get; set; }
 
-        [Required]
+        [Required, NotNull]
         public string Username { get; set; }
 
         public string? Pseudonym { get; set; }
