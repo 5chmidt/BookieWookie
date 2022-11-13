@@ -1,4 +1,3 @@
-using BookieWookie.API.Authorization;
 using BookieWookie.API.Services;
 using BookieWookie.Helpers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

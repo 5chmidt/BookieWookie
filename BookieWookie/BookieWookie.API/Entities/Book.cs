@@ -1,9 +1,8 @@
-﻿using BookieWookie.API.Authorization;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace BookieWookie.API.Entities
 {
-    public class Book //: OwnedByBase
+    public class Book
     {
         [Key]
         public int BookId { get; set; }

@@ -72,7 +72,7 @@ namespace BookieWookie.API.Services
         {
             using (var db = new WookieBookieContext(this.Configuration))
             {
-                var books = db.Books.AsEnumerable();
+                var books = db.Books.AsQueryable();
                 foreach (PropertyInfo property in bookParams.GetType().GetRuntimeProperties())
                 {
                     object? value = property.GetValue(bookParams, null);
@@ -128,7 +128,7 @@ namespace BookieWookie.API.Services
                     }
                 }
 
-                return await db.Books.ToArrayAsync();
+                return await books.ToArrayAsync();
             }
         }
 

@@ -5,8 +5,6 @@
     using BookieWookie.API.Helpers;
     using BookieWookie.API.Models;
     using BookieWookie.API.Services;
-    using System.Runtime.CompilerServices;
-    using BookieWookie.API.Authorization;
 
     [ApiController]
     [Route("[controller]")]
