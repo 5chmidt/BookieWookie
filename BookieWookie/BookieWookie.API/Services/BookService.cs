@@ -94,7 +94,7 @@ namespace BookieWookie.API.Services
                     }
                     else if(property.Name == nameof(BookParameters.Title))
                     {
-                        books.Where(b => b.Title.Contains((string)value);
+                        books.Where(b => b.Title.Contains((string)value));
                     }
                 }
 

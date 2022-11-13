@@ -17,7 +17,7 @@
                 return;
             }
 
-            int id = user.Id;
+            int id = user.UserId;
         }
     }
 }

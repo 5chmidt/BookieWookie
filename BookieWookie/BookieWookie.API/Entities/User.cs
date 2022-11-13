@@ -6,10 +6,14 @@
 
     public class User
     {
+        [Key]
         [Required]
-        public int Id { get; set; }
+        public int UserId { get; set; }
+
         public string? FirstName { get; set; }
+
         public string? LastName { get; set; }
+
         [Required]
         public string Username { get; set; }
 
@@ -17,7 +21,10 @@
 
         [JsonIgnore]
         public byte[] Salt { get; set; }
+
         [JsonIgnore]
         public byte[] Hash { get; set; }
+
+        public ICollection<Book> Books { get; set; }
     }
 }

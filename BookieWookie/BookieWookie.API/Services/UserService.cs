@@ -56,7 +56,7 @@
 
             Claim[] claims = new Claim[]
             {
-                new Claim(nameof(User.Id), user.Id.ToString(), ClaimValueTypes.String),
+                new Claim(nameof(User.UserId), user.UserId.ToString(), ClaimValueTypes.String),
                 new Claim(nameof(User.Username), user.Username, ClaimValueTypes.String),
             };
 
@@ -91,7 +91,7 @@
 
             Claim[] claims = new Claim[]
             {
-                new Claim(nameof(User.Id), user.Id.ToString(), ClaimValueTypes.String),
+                new Claim(nameof(User.UserId), user.UserId.ToString(), ClaimValueTypes.String),
                 new Claim(nameof(User.Username), user.Username, ClaimValueTypes.String),
             };
             return IssueToken(claims);
@@ -126,7 +126,7 @@
             var user = new User();
             using (var db = new WookieBookieContext(this.Configuration))
             {
-                user = db.Users.SingleOrDefault(u => u.Id == id);
+                user = db.Users.SingleOrDefault(u => u.UserId == id);
                 if (user == null)
                 {
                     throw new AuthenticationException($"User ID: {id} does not exist.");
@@ -151,7 +151,7 @@
         {
             using (var db = new WookieBookieContext(this.Configuration))
             {
-                return db.Users.Single(u => u.Id == id);
+                return db.Users.Single(u => u.UserId == id);
             }
         }
 

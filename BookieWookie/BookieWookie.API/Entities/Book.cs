@@ -5,10 +5,8 @@ namespace BookieWookie.API.Entities
 {
     public class Book //: OwnedByBase
     {
-        public int Id { get; set; }
-
-        [Required]
-        public int AuthorId { get; set; }
+        [Key]
+        public int BookId { get; set; }
 
         [Required]
         public DateTime CreatedAt { get; set; }
@@ -17,5 +15,10 @@ namespace BookieWookie.API.Entities
         public string Title { get; set; }
 
         public string? Description { get; set; }
+
+        [Required]
+        public int UserId { get; set; }
+
+        public User User { get; set; }
     }
 }
