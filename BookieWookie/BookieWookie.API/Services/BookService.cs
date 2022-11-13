@@ -2,15 +2,18 @@
 using BookieWookie.API.Helpers;
 using BookieWookie.API.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Net;
+using System.Reflection;
 
 namespace BookieWookie.API.Services
 {
     public interface IBookService
     {
         Task<Book> Create(CreateBookRequest request, int userId);
-        Book Update();
+        Task<Book> Update(Book book, int userId);
         Task<Book> Delete(int bookId, int userId);
-        IEnumerable<Book> Get();
+        Task<IEnumerable<Book>> Get(BookParameters bookParams);
     }
 
 
@@ -31,7 +34,7 @@ namespace BookieWookie.API.Services
                 Title = request.Title,
                 Description = request.Description,
                 CreatedAt = DateTime.Now,
-                AuthorId = userId,
+                UserId = userId,
             };
 
             using (var db = new WookieBookieContext(this.Configuration))
@@ -53,8 +56,8 @@ namespace BookieWookie.API.Services
         {
             using (var db = new WookieBookieContext(this.Configuration))
             {
-                Book book = await db.Books.SingleAsync(b => b.Id == bookId);
-                if (book.AuthorId != userId)
+                Book book = await db.Books.SingleAsync(b => b.BookId == bookId);
+                if (book.UserId != userId)
                 {
                     throw new UnauthorizedAccessException($"Authors can only remove their own books.");
                 }
@@ -65,17 +68,53 @@ namespace BookieWookie.API.Services
             }
         }
 
-        public IEnumerable<Book> Get()
+        public async Task<IEnumerable<Book>> Get(BookParameters bookParams)
         {
+
+
             using (var db = new WookieBookieContext(this.Configuration))
             {
-                return db.Books.ToArray();
+                var books = db.Books;
+                foreach (PropertyInfo property in bookParams.GetType().GetRuntimeProperties())
+                {
+                    object? value = property.GetValue(bookParams, null);
+                    if (value == null)
+                    {
+                        continue;
+                    }
+
+                    // query mapping //
+                    if (property.Name == nameof(BookParameters.Id))
+                    {
+                        books.Where(b => b.BookId == (int)value);
+                    }
+                    else if(property.Name == nameof(BookParameters.AuthorId))
+                    {
+                        books.Where(b => b.UserId == (int)value);
+                    }
+                    else if(property.Name == nameof(BookParameters.Title))
+                    {
+                        books.Where(b => b.Title.Contains((string)value);
+                    }
+                }
+
+                return await db.Books.ToArrayAsync();
             }
         }
 
-        public Book Update()
+        public async Task<Book> Update(Book book, int userId)
         {
-            throw new NotImplementedException();
+            using (var db = new WookieBookieContext(this.Configuration))
+            {
+                if (book.UserId != userId)
+                {
+                    throw new UnauthorizedAccessException($"Authors can only remove their own books.");
+                }
+
+                db.Entry<Book>(book).State = EntityState.Modified;
+                await db.SaveChangesAsync();
+                return book;
+            }
         }
     }
 }
