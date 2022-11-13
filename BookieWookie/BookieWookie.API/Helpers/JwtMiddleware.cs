@@ -41,10 +41,16 @@
 
                 var principle = tokenHandler.ValidateToken(token, parameters, out SecurityToken validatedToken);
                 var jwtToken = (JwtSecurityToken)validatedToken;
-                var userId = int.Parse(jwtToken.Claims.First(x => x.Type == nameof(API.Entities.User.UserId)).Value);
+                var userId = int.Parse(jwtToken.Claims.First(x => x.Type == nameof(Entities.User.UserId)).Value);
+                
+                // parse permission level from token //
+                var permission = Authorization.PermissionLevel.None;
+                string permissionName = jwtToken.Claims.First(x => x.Type == nameof(Authorization.PermissionLevel)).Value;
+                Enum.TryParse(permissionName, out permission);
 
-                // attach user to context on successful jwt validation
-                context.Items[nameof(API.Entities.User)] = userService.GetById(userId);
+                // attach to context on successful jwt validation
+                context.Items[nameof(Entities.User)] = userService.GetById(userId);
+                context.Items[nameof(Authorization.PermissionLevel)] = permission;
             }
             catch
             {

@@ -1,4 +1,5 @@
-﻿using BookieWookie.API.Entities;
+﻿using BookieWookie.API.Authorization;
+using BookieWookie.API.Entities;
 using BookieWookie.API.Helpers;
 using BookieWookie.API.Models;
 using BookieWookie.API.Services;
@@ -27,7 +28,7 @@ namespace BookieWookie.API.Controllers
         [HttpGet("get")]
         public async Task<IActionResult> Get([FromQuery] BookParameters bookParams)
         {
-            IEnumerable<Entities.Book> books;
+            IEnumerable<Book> books;
             try
             {
                 books = await _bookService.Get(bookParams);
@@ -44,7 +45,7 @@ namespace BookieWookie.API.Controllers
         [HttpPost("create")]
         public async Task<IActionResult> Create(CreateBookRequest model)
         {
-            Entities.Book book;
+            Book book;
             try
             {
                 book = await _bookService.Create(model, UserId);
@@ -59,7 +60,7 @@ namespace BookieWookie.API.Controllers
 
         [AuthorizeOwner]
         [HttpPost("update")]
-        public async Task<IActionResult> Update(Entities.Book book)
+        public async Task<IActionResult> Update(Book book)
         {
             try
             {
@@ -81,7 +82,7 @@ namespace BookieWookie.API.Controllers
         [HttpDelete("{bookId}")]
         public async Task<IActionResult> Delete(int bookId)
         {
-            Entities.Book book;
+            Book book;
             try
             {
                 book = await _bookService.Delete(bookId, UserId);
@@ -101,9 +102,18 @@ namespace BookieWookie.API.Controllers
         private int UserId { 
             get
             {
-                var user = (Entities.User?)HttpContext.Items["User"];
+                var user = (User?)HttpContext.Items[nameof(Entities.User)];
                 return user == null ? 0 : Convert.ToInt32(user.UserId);
             } 
+        }
+
+        private PermissionLevel UserPermission
+        {
+            get
+            {
+                var permission = (PermissionLevel?)HttpContext.Items[nameof(PermissionLevel)];
+                return permission == null ? PermissionLevel.None : (PermissionLevel)permission;
+            }
         }
     }
 }
