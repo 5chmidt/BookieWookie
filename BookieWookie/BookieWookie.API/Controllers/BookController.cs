@@ -1,4 +1,5 @@
-﻿using BookieWookie.API.Helpers;
+﻿using BookieWookie.API.Entities;
+using BookieWookie.API.Helpers;
 using BookieWookie.API.Models;
 using BookieWookie.API.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -24,12 +25,12 @@ namespace BookieWookie.API.Controllers
 
         [AuthorizeOwner]
         [HttpGet("get")]
-        public IActionResult Get()
+        public async Task<IActionResult> Get([FromQuery] BookParameters bookParams)
         {
             IEnumerable<Entities.Book> books;
             try
             {
-                books = _bookService.Get();
+                books = await _bookService.Get(bookParams);
             }
             catch (AuthenticationException ex)
             {
@@ -58,9 +59,22 @@ namespace BookieWookie.API.Controllers
 
         [AuthorizeOwner]
         [HttpPost("update")]
-        public IActionResult Update()
+        public async Task<IActionResult> Update(Entities.Book book)
         {
-            throw new NotImplementedException();
+            try
+            {
+                book = await _bookService.Update(book, UserId);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+            return Ok(book);
         }
 
         [AuthorizeOwner]
@@ -88,7 +102,7 @@ namespace BookieWookie.API.Controllers
             get
             {
                 var user = (Entities.User?)HttpContext.Items["User"];
-                return user == null ? 0 : Convert.ToInt32(user.Id);
+                return user == null ? 0 : Convert.ToInt32(user.UserId);
             } 
         }
     }
