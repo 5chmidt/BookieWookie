@@ -5,6 +5,9 @@ namespace BookieWookie.API.Models
     public class UserRequest
     {
         [Required]
+        public int UserId { get; set; }
+
+        [Required]
         public string? Username { get; set; }
 
         [Required]
