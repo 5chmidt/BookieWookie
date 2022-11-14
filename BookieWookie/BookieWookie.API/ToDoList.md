@@ -29,3 +29,14 @@ XML Comment Documentation for Schemas
 	AuthenticationRequest
 	CreateBookRequest
 	UserRequest
+
+
+DevOps Wishlist
+Create docker build
+	- Image for Authentication only
+		Slow and secure with dedicated resources
+	- Image for API
+		Fast async controller calls
+	- SQL Express Image
+		With EF migration setup in build
+	- Load balancing for API
