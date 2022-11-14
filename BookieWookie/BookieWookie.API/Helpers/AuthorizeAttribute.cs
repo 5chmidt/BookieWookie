@@ -5,9 +5,13 @@
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.Filters;
 
+    /// <summary>
+    /// Authorization attribute to check permissions on endpoints.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
     public class AuthorizeOwnerAttribute : Attribute, IAuthorizationFilter
     {
+        /// <inheritdoc/>
         public void OnAuthorization(AuthorizationFilterContext context)
         {
             User? user = context.HttpContext.Items[nameof(User)] as User;
@@ -35,7 +39,7 @@
 
             // require permission based on the endpoint action //
             PermissionLevel requiredPermission;
-            string action = context.RouteData.Values["Action"].ToString();
+            string? action = (string?)context.RouteData.Values["Action"];
             if (Enum.TryParse<PermissionLevel>(action, true, out requiredPermission) == false)
             {
                 requiredPermission = PermissionLevel.Admin;
