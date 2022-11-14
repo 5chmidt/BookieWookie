@@ -45,7 +45,7 @@ namespace BookieWookie.API.Services
 
         public int Iterations { get; init; } = 40;
 
-        public int DegreeOfParallelism { get; set; } = 8; // four cores
+        public int DegreeOfParallelism { get; init; } = 8; // four cores
 
         public byte[] CreateSalt()
         {

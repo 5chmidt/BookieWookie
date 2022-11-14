@@ -29,9 +29,12 @@
     {
         private readonly IConfiguration Configuration;
 
-        public UserService(IConfiguration configuration)
+        private readonly IAuthenticationService Authentication;
+
+        public UserService(IAuthenticationService authenticationService, IConfiguration configuration)
         {
             this.Configuration = configuration;
+            this.Authentication = authenticationService;
         }
 
         public JWTTokenResponse Authenticate(AuthenticateRequest model)
@@ -50,13 +53,12 @@
             }
 
             // verify the hashed password //
-            var authService = new AuthenticationService();
-            if (authService.VerifyHash(model.Password, user.Salt, user.Hash) == false)
+            if (this.Authentication.VerifyHash(model.Password, user.Salt, user.Hash) == false)
             {
                 return null;
             }
-            var permission = Authorization.Authorize.GetPermissionLevel(user);
 
+            var permission = Authorization.Authorize.GetPermissionLevel(user);
             Claim[] claims = new Claim[]
             {
                 new Claim(nameof(User.UserId), user.UserId.ToString(), ClaimValueTypes.String),
@@ -81,12 +83,11 @@
                 AuthenticationService.CheckPasswordRequirements(model.Password);
 
                 user.Username = model.Username;
-                var authService = new AuthenticationService();
                 user.FirstName = model.FirstName;
                 user.LastName = model.LastName;
                 user.Pseudonym = model.Pseudonym;
-                user.Salt = authService.CreateSalt();
-                user.Hash = authService.HashPassword(model.Password, user.Salt);
+                user.Salt = this.Authentication.CreateSalt();
+                user.Hash = this.Authentication.HashPassword(model.Password, user.Salt);
                 db.Users.Add(user);
                 db.SaveChanges();
             }
@@ -136,9 +137,8 @@
                     if (modelProperty.Name == nameof(model.Password))
                     {
                         // special handling for password updates //
-                        var authService = new AuthenticationService();
-                        user.Salt = authService.CreateSalt();
-                        user.Hash = authService.HashPassword(model.Password, user.Salt);
+                        user.Salt = this.Authentication.CreateSalt();
+                        user.Hash = this.Authentication.HashPassword(model.Password, user.Salt);
                     }
                     else if (modelProperty.Name == nameof(model.Username))
                     {
