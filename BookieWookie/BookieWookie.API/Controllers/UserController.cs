@@ -29,6 +29,28 @@
         }
 
         /// <summary>
+        /// Gets a user's profile information by UserId.
+        /// </summary>
+        /// <param name="id">Interger identifier.</param>
+        /// <returns>User profile model.</returns>
+        [AuthorizeOwner]
+        [HttpGet("{id}")]
+        public IActionResult Get(int id)
+        {
+            Entities.User model;
+            try
+            {
+                model = _userService.GetById(id);
+            }
+            catch (AuthenticationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+            return Ok(model);
+        }
+
+        /// <summary>
         /// Verify username and password then return a JWT with user claims.
         /// </summary>
         /// <param name="model"></param>
@@ -111,13 +133,16 @@
             return Ok(model);
         }
 
+
+
         /// <summary>
         /// Gets a list of all active users.
         /// </summary>
         /// <returns>Array of user objects.</returns>
         [AuthorizeOwner]
-        [HttpGet("get")]
-        public IActionResult Get()
+        [HttpGet("getall")]
+        [ApiExplorerSettings(IgnoreApi = true)]
+        public IActionResult GetAll()
         {
             var users = _userService.GetAll();
             return Ok(users);
