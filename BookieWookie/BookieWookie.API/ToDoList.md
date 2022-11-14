@@ -23,7 +23,7 @@ Controller Unit Tests:
 	
 Swagger Configurations:
 	Add bearer token options where required
-	For non-dev builds add login page to access swagger documentation.
+	For non-dev builds add login page to get token and access swagger documentation.
 
 XML Comment Documentation for Schemas
 	AuthenticationRequest
@@ -36,7 +36,7 @@ Create docker build
 	- Image for Authentication only
 		Slow and secure with dedicated resources
 	- Image for API
-		Fast async controller calls
+		Fast async controller calls seperated from auth
 	- SQL Express Image
 		With EF migration setup in build
 	- Load balancing for API
