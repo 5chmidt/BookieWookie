@@ -26,6 +26,7 @@
         [JsonIgnore]
         public byte[] Hash { get; set; }
 
+        [JsonIgnore]
         public ICollection<Book> Books { get; set; }
     }
 }

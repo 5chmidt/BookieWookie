@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Serialization;
 
 namespace BookieWookie.API.Entities
 {
@@ -32,6 +33,17 @@ namespace BookieWookie.API.Entities
         public string? Description { get; set; }
 
         /// <summary>
+        /// Gets or sets the fileId of the cover photo.
+        /// </summary>
+        public int FileId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the file 
+        /// </summary>
+        [JsonIgnore]
+        public File File { get; set; }
+
+        /// <summary>
         /// Gets or sets the UserId to link the book with the author's user.
         /// </summary>
         [Required]
@@ -40,6 +52,7 @@ namespace BookieWookie.API.Entities
         /// <summary>
         /// Gets or sets the User object for the author.
         /// </summary>
+        [JsonIgnore]
         public User User { get; set; }
     }
 }
