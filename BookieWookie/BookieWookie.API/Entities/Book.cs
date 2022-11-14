@@ -35,7 +35,7 @@ namespace BookieWookie.API.Entities
         /// <summary>
         /// Gets or sets the fileId of the cover photo.
         /// </summary>
-        public int FileId { get; set; }
+        public int? FileId { get; set; }
 
         /// <summary>
         /// Gets or sets the file 
