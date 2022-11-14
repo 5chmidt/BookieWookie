@@ -26,17 +26,21 @@
                 return;
             }
 
+            // parse the authorization claim to get the assigned permission level //
             object? value = context.HttpContext.Items[nameof(PermissionLevel)];
             if (value != null && value.GetType() == typeof(PermissionLevel))
             {
                 authorizedPermission = (PermissionLevel)value;
             }
 
-            PermissionLevel requiredPermission = PermissionLevel.Admin;
-            Enum.TryParse<PermissionLevel>(
-                context.RouteData.Values["Action"].ToString(), 
-                true,
-                out requiredPermission);
+            // require permission based on the endpoint action //
+            PermissionLevel requiredPermission;
+            string action = context.RouteData.Values["Action"].ToString();
+            if (Enum.TryParse<PermissionLevel>(action, true, out requiredPermission) == false)
+            {
+                requiredPermission = PermissionLevel.Admin;
+            };
+
             if (authorizedPermission < requiredPermission)
             {
                 // user lacks the required permissions //

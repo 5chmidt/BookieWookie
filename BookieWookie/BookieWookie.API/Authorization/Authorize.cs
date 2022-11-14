@@ -17,7 +17,7 @@ namespace BookieWookie.API.Authorization
                 || user.Username == "_Darth Vader_")
             {
                 // Darth Vader can only view books //
-                return PermissionLevel.View;
+                return PermissionLevel.Get;
             }
             else if (user.Username == "Yoda")
             {

@@ -3,8 +3,8 @@
     public enum PermissionLevel
     {
         None,
-        View,
-        Modify,
+        Get,
+        Update,
         Create,
         Delete,
         Admin
