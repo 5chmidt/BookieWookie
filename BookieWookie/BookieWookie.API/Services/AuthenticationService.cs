@@ -7,6 +7,9 @@ namespace BookieWookie.API.Services
     using BookieWookie.API.Helpers;
     using System.Security.Authentication;
 
+    /// <summary>
+    /// Interface should implent salting, hashing and verification.
+    /// </summary>
     public interface IAuthenticationService
     {
         /// <summary>
@@ -46,6 +49,14 @@ namespace BookieWookie.API.Services
         {
         }
 
+        /// <summary>
+        /// Intialize different parameter values for secure password hashing.
+        /// !!IMPORTANT!! Changing these values will create a different hash for the same password.
+        /// </summary>
+        /// <param name="byteSize">Number of bytes to be used in salt.</param>
+        /// <param name="memorgySize">Amount of memeory to dedicate to hashing.</param>
+        /// <param name="iterations">Number of times to hash password + salt.</param>
+        /// <param name="degreeOfParallelism">Number of cores used in hashing.</param>
         public AuthenticationService(
             int byteSize,
             int memorgySize,
@@ -58,12 +69,24 @@ namespace BookieWookie.API.Services
             DegreeOfParallelism = degreeOfParallelism;
         }
 
+        /// <summary>
+        /// Number of kb to be used in salt.
+        /// </summary>
         public int ByteSize { get; init; } = 128;
 
+        /// <summary>
+        /// Amount of memeory (bytes) to dedicate to hashing.
+        /// </summary>
         public int MemorgySize { get; init; } = 1024 * 100; // 100 MB
 
+        /// <summary>
+        /// Number of times to hash password + salt.
+        /// </summary>
         public int Iterations { get; init; } = 40;
 
+        /// <summary>
+        /// Number of cores used in hashing.
+        /// </summary>
         public int DegreeOfParallelism { get; init; } = 8; // four cores
     
         /// <inheritdoc/>
