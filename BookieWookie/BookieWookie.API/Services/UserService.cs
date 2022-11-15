@@ -17,7 +17,7 @@
 
     public interface IUserService
     {
-        JWTTokenResponse Authenticate(AuthenticateRequest model);
+        Task<JWTTokenResponse> Authenticate(AuthenticateRequest model);
         JWTTokenResponse CreateUser(UserRequest model);
         User DeleteUser(int id);
         User UpdateUser(UserRequest model);
@@ -37,13 +37,13 @@
             this.Authentication = authenticationService;
         }
 
-        public JWTTokenResponse Authenticate(AuthenticateRequest model)
+        public async Task<JWTTokenResponse> Authenticate(AuthenticateRequest model)
         {
             // find user in database //
-            User user;
+            User? user;
             using (var db = new BookieWookieContext(this.Configuration))
             {
-                user = db.Users.SingleOrDefault(x => x.Username == model.Username);
+                user = await db.Users.SingleOrDefaultAsync(x => x.Username == model.Username);
             }
 
             // return null if user not found

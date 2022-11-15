@@ -2,6 +2,7 @@ using BookieWookie.API.Services;
 using BookieWookie.API.Helpers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Reflection;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,20 +30,25 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 // configure DI for application services
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IBookService, BookService>();
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 
 var app = builder.Build();
 
+// user auth middle ware //
+app.UseMiddleware<SwaggerBasicAuthMiddleware>();
+
 // Configure the HTTP request pipeline.
+app.UseSwagger();
+app.UseSwaggerUI();
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-
-
+    app.UseDeveloperExceptionPage();
 }
 
 app.UseHttpsRedirection();
 
+
+//app.UseSwaggerAuthorized();
 app.UseAuthorization();
 app.UseMiddleware<JwtMiddleware>();
 app.MapControllers();
