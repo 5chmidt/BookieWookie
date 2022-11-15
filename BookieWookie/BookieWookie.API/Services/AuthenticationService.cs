@@ -9,8 +9,27 @@ namespace BookieWookie.API.Services
 
     public interface IAuthenticationService
     {
+        /// <summary>
+        /// Generate a cryptographically random number using initialized parameters.
+        /// </summary>
+        /// <returns></returns>
         byte[] CreateSalt();
+
+        /// <summary>
+        /// Generate a secure password has using the salt and initialized parameters.
+        /// </summary>
+        /// <param name="password"></param>
+        /// <param name="salt"></param>
+        /// <returns></returns>
         byte[] HashPassword(string password, byte[] salt);
+
+        /// <summary>
+        /// Verify newly hashed password against stored hash.
+        /// </summary>
+        /// <param name="password">Unmodified string password.</param>
+        /// <param name="salt">Randomly generated number stored with hash.</param>
+        /// <param name="hash">Stored password hash.</param>
+        /// <returns>True if password matches stored hash.</returns>
         bool VerifyHash(string password, byte[] salt, byte[] hash);
     }
 
@@ -46,12 +65,14 @@ namespace BookieWookie.API.Services
         public int Iterations { get; init; } = 40;
 
         public int DegreeOfParallelism { get; init; } = 8; // four cores
-
+    
+        /// <inheritdoc/>
         public byte[] CreateSalt()
         {
             return System.Security.Cryptography.RandomNumberGenerator.GetBytes(this.ByteSize);
         }
-
+        
+        /// <inheritdoc/>
         public byte[] HashPassword(string password, byte[] salt)
         {
             byte[] data = Encoding.UTF8.GetBytes(password);
@@ -64,7 +85,8 @@ namespace BookieWookie.API.Services
 
             return argon2.GetBytes(this.ByteSize);
         }
-
+        
+        /// <inheritdoc/>
         public bool VerifyHash(string password, byte[] salt, byte[] hash)
         {
             var newHash = HashPassword(password, salt);
