@@ -5,7 +5,12 @@ VisualStudioVersion = 17.3.32929.385
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BookieWookie.API", "BookieWookie.API\BookieWookie.API.csproj", "{F47FA444-3C33-4E1E-BA3A-02538E06246D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookieWookie.Test", "BookieWookie.Test\BookieWookie.Test.csproj", "{640A0E33-85B0-40FC-B939-A371B0519F9C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BookieWookie.Test", "BookieWookie.Test\BookieWookie.Test.csproj", "{640A0E33-85B0-40FC-B939-A371B0519F9C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1B9689E7-755C-44C5-A7E8-67DC8D0B631A}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

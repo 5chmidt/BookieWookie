@@ -59,11 +59,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IBookService, BookService>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+builder.Services.AddScoped<IFileService, FileService>();
 
 var app = builder.Build();
 
 // user auth middle ware //
-app.UseMiddleware<SwaggerBasicAuthMiddleware>();
+//app.UseMiddleware<SwaggerBasicAuthMiddleware>();
+app.UseMiddleware<JwtMiddleware>();
 
 // Configure the HTTP request pipeline.
 app.UseSwagger();
@@ -74,10 +76,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-
 app.UseAuthorization();
-app.UseMiddleware<JwtMiddleware>();
 app.MapControllers();
 
 app.Run();

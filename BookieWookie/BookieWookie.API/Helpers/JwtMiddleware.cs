@@ -18,7 +18,9 @@
         {
             var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split("Bearer ").Last();
             if (token != null)
+            {
                 attachUserToContext(context, userService, token);
+            }
 
             await _next(context);
         }
@@ -44,13 +46,13 @@
                 var userId = int.Parse(jwtToken.Claims.First(x => x.Type == nameof(Entities.User.UserId)).Value);
                 
                 // parse permission level from token //
-                var permission = Authorization.PermissionLevel.None;
-                string permissionName = jwtToken.Claims.First(x => x.Type == nameof(Authorization.PermissionLevel)).Value;
+                var permission = API.Authorization.PermissionLevel.None;
+                string permissionName = jwtToken.Claims.First(x => x.Type == nameof(API.Authorization.PermissionLevel)).Value;
                 Enum.TryParse(permissionName, out permission);
 
                 // attach to context on successful jwt validation
                 context.Items[nameof(Entities.User)] = userService.GetById(userId);
-                context.Items[nameof(Authorization.PermissionLevel)] = permission;
+                context.Items[nameof(API.Authorization.PermissionLevel)] = permission;
             }
             catch
             {
@@ -58,5 +60,7 @@
                 // user is not attached to context so request won't have access to secure routes
             }
         }
+
+
     }
 }

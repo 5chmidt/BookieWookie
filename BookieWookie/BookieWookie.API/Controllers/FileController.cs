@@ -30,15 +30,15 @@ namespace BookieWookie.API.Controllers
         /// </summary>
         /// <param name="file">File sent via HTTP request.</param>
         /// <returns>File model.</returns>
-        [HttpPost("UploadImage")]
+        [HttpPost("Create")]
         [AuthorizeOwner]
-        public async Task<ActionResult> TaskUploadImage(IFormFile file)
+        public async Task<ActionResult> Create(IFormFile file)
         {
             Entities.File fileEntity = new();
             try
             {
                 int userId = this.ParseUserIdFromContext();
-                fileEntity = await _fileService.UploadImage(file, userId);
+                fileEntity = await _fileService.Upload(file, userId);
             }
             catch (FileLoadException ex)
             {

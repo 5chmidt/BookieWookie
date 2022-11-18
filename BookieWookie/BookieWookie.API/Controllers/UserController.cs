@@ -55,7 +55,7 @@
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        [HttpPost("authenticate")]
+        [HttpPost("Authenticate")]
         public async Task<IActionResult> Authenticate(AuthenticateRequest model)
         {
             var response = await _userService.Authenticate(model);
@@ -72,7 +72,7 @@
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        [HttpPost("create")]
+        [HttpPost("Create")]
         public IActionResult Create(UserRequest model)
         {
             JWTTokenResponse responce;
@@ -95,7 +95,7 @@
         /// <param name="model"></param>
         /// <returns></returns>
         [AuthorizeOwner]
-        [HttpPost("update")]
+        [HttpPost("Update")]
         public IActionResult Update(UserRequest model)
         {
             Entities.User user;
@@ -138,7 +138,7 @@
         /// </summary>
         /// <returns>Array of user objects.</returns>
         [AuthorizeOwner]
-        [HttpGet("getall")]
+        [HttpGet("GetAll")]
         [ApiExplorerSettings(IgnoreApi = true)]
         public IActionResult GetAll()
         {

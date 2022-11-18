@@ -39,7 +39,7 @@ namespace BookieWookie.API.Controllers
         /// <param name="bookParams">Optional parameters for book queries.</param>
         /// <returns></returns>
         [AuthorizeOwner]
-        [HttpGet("get")]
+        [HttpGet("Get")]
         public async Task<IActionResult> Get([FromQuery] BookParameters bookParams)
         {
             IEnumerable<Book> books;
@@ -61,7 +61,7 @@ namespace BookieWookie.API.Controllers
         /// <param name="model">Book creation request, the authorized user will be added as the owner.</param>
         /// <returns></returns>
         [AuthorizeOwner]
-        [HttpPost("create")]
+        [HttpPost("Create")]
         public async Task<IActionResult> Create(CreateBookRequest model)
         {
             Book book;
@@ -83,7 +83,7 @@ namespace BookieWookie.API.Controllers
         /// <param name="book">Book object to be updated.</param>
         /// <returns>The object that was updated.</returns>
         [AuthorizeOwner]
-        [HttpPost("update")]
+        [HttpPost("Update")]
         public async Task<IActionResult> Update(Book book)
         {
             try

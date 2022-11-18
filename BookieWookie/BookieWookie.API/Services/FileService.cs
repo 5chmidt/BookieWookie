@@ -11,7 +11,7 @@
         /// <param name="file">File sent via HTTP request.</param>
         /// <param name="userId">Id of the currently authenticated user.</param>
         /// <returns>Model of the uploaded file.</returns>
-        Task<Entities.File> UploadImage(IFormFile file, int userId);
+        Task<Entities.File> Upload(IFormFile file, int userId);
 
     }
 
@@ -33,7 +33,7 @@
         }
 
         /// <inheritdoc/>
-        public async Task<Entities.File> UploadImage(IFormFile file, int userId)
+        public async Task<Entities.File> Upload(IFormFile file, int userId)
         {
             if (file.Length == 0)
             {
