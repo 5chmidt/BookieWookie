@@ -21,10 +21,6 @@ Controller Unit Tests:
 
 	/file/upload/
 	
-Swagger Configurations:
-	Add bearer token options where required
-	For non-dev builds add login page to get token and access swagger documentation.
-
 XML Comment Documentation for Schemas
 	AuthenticationRequest
 	CreateBookRequest
