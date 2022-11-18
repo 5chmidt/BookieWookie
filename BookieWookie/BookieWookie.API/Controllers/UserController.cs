@@ -133,8 +133,6 @@
             return Ok(model);
         }
 
-
-
         /// <summary>
         /// Gets a list of all active users.
         /// </summary>

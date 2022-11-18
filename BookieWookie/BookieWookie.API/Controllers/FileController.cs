@@ -1,4 +1,5 @@
 ﻿using BookieWookie.API.Helpers;
+using BookieWookie.API.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookieWookie.API.Controllers
@@ -12,13 +13,16 @@ namespace BookieWookie.API.Controllers
     {
         private IConfiguration _configuration;
 
+        private IFileService _fileService;
+
         /// <summary>
         /// Initialize FileController with dependency injection.
         /// </summary>
         /// <param name="configuration"></param>
-        public FileController(IConfiguration configuration)
+        public FileController(IConfiguration configuration, IFileService fileService)
         {
             _configuration = configuration;
+            _fileService = fileService;
         }
 
         /// <summary>
@@ -27,15 +31,25 @@ namespace BookieWookie.API.Controllers
         /// <param name="file">File sent via HTTP request.</param>
         /// <returns>File model.</returns>
         [HttpPost("UploadImage")]
-        public ActionResult UploadImage(IFormFile file)
+        [AuthorizeOwner]
+        public async Task<ActionResult> TaskUploadImage(IFormFile file)
         {
-            if (file.ContentType.Split('/').FirstOrDefault() != "image")
+            Entities.File fileEntity = new();
+            try
             {
-                return BadRequest("uploaded file is not an image.");
+                int userId = this.ParseUserIdFromContext();
+                fileEntity = await _fileService.UploadImage(file, userId);
+            }
+            catch (FileLoadException ex)
+            {
+                BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                BadRequest(ex.Message);
             }
 
-            // we can put rest of upload logic here.
-            return Ok(file.FileName);
+            return Ok(fileEntity);
         }
     }
 }
