@@ -4,7 +4,6 @@ using BookieWookie.API.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -12,10 +11,9 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BookieWookie.API.Migrations
 {
     [DbContext(typeof(BookieWookieContext))]
-    [Migration("20221113040113_foreign_keys")]
-    partial class foreign_keys
+    partial class BookieWookieContextModelSnapshot : ModelSnapshot
     {
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -38,6 +36,9 @@ namespace BookieWookie.API.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("FileId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -47,9 +48,44 @@ namespace BookieWookie.API.Migrations
 
                     b.HasKey("BookId");
 
+                    b.HasIndex("FileId");
+
                     b.HasIndex("UserId");
 
                     b.ToTable("Books");
+                });
+
+            modelBuilder.Entity("BookieWookie.API.Entities.File", b =>
+                {
+                    b.Property<int>("FileId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FileId"), 1L, 1);
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Path")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Purpose")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Uploaded")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("FileId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Files");
                 });
 
             modelBuilder.Entity("BookieWookie.API.Entities.User", b =>
@@ -88,8 +124,25 @@ namespace BookieWookie.API.Migrations
 
             modelBuilder.Entity("BookieWookie.API.Entities.Book", b =>
                 {
+                    b.HasOne("BookieWookie.API.Entities.File", "File")
+                        .WithMany()
+                        .HasForeignKey("FileId");
+
                     b.HasOne("BookieWookie.API.Entities.User", "User")
                         .WithMany("Books")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("File");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("BookieWookie.API.Entities.File", b =>
+                {
+                    b.HasOne("BookieWookie.API.Entities.User", "User")
+                        .WithMany("Files")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -100,6 +153,8 @@ namespace BookieWookie.API.Migrations
             modelBuilder.Entity("BookieWookie.API.Entities.User", b =>
                 {
                     b.Navigation("Books");
+
+                    b.Navigation("Files");
                 });
 #pragma warning restore 612, 618
         }

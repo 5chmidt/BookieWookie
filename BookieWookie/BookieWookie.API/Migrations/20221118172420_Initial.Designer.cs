@@ -4,6 +4,7 @@ using BookieWookie.API.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BookieWookie.API.Migrations
 {
     [DbContext(typeof(BookieWookieContext))]
-    partial class DbContextClassModelSnapshot : ModelSnapshot
+    [Migration("20221118172420_Initial")]
+    partial class Initial
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -63,6 +65,10 @@ namespace BookieWookie.API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FileId"), 1L, 1);
 
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Path")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -74,9 +80,14 @@ namespace BookieWookie.API.Migrations
                     b.Property<DateTime>("Uploaded")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
                     b.HasKey("FileId");
 
-                    b.ToTable("File");
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Files");
                 });
 
             modelBuilder.Entity("BookieWookie.API.Entities.User", b =>
@@ -130,9 +141,22 @@ namespace BookieWookie.API.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("BookieWookie.API.Entities.File", b =>
+                {
+                    b.HasOne("BookieWookie.API.Entities.User", "User")
+                        .WithMany("Files")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("BookieWookie.API.Entities.User", b =>
                 {
                     b.Navigation("Books");
+
+                    b.Navigation("Files");
                 });
 #pragma warning restore 612, 618
         }
