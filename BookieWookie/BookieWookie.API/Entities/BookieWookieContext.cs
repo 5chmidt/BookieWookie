@@ -14,8 +14,9 @@ namespace BookieWookie.API.Entities
             Configuration = configuration;
         }
 
-        public DbSet<User> Users { get; set; }
-        public DbSet<Book> Books { get; set; }
+        public virtual DbSet<User> Users { get; set; }
+        public virtual DbSet<Book> Books { get; set; }
+        public virtual DbSet<File> Files { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {

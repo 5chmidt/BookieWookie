@@ -14,6 +14,8 @@ namespace BookieWookie.API.Entities
         [Required, NotNull]
         public string Path { get; set; }
 
+        public string FileName { get; set; }
+
         public DateTime Uploaded { get; set; }
     }
 }

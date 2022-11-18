@@ -41,7 +41,7 @@ namespace BookieWookie.API.Entities
         /// Gets or sets the file 
         /// </summary>
         [JsonIgnore]
-        public File File { get; set; }
+        public virtual File File { get; set; }
 
         /// <summary>
         /// Gets or sets the UserId to link the book with the author's user.
@@ -53,6 +53,6 @@ namespace BookieWookie.API.Entities
         /// Gets or sets the User object for the author.
         /// </summary>
         [JsonIgnore]
-        public User User { get; set; }
+        public virtual User User { get; set; }
     }
 }
