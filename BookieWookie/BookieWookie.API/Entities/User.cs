@@ -28,5 +28,8 @@
 
         [JsonIgnore]
         public virtual ICollection<Book> Books { get; set; }
+
+        [JsonIgnore]
+        public virtual ICollection<File> Files { get; set; }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using BookieWookie.API.Helpers;
 using BookieWookie.API.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace BookieWookie.API.Controllers
 {
@@ -42,11 +43,15 @@ namespace BookieWookie.API.Controllers
             }
             catch (FileLoadException ex)
             {
-                BadRequest(ex.Message);
+                return BadRequest(ex.Message);
+            }
+            catch(DbUpdateException ex)
+            {
+                return BadRequest(ex.Message + Environment.NewLine + ex.InnerException.Message);
             }
             catch (Exception ex)
             {
-                BadRequest(ex.Message);
+                return BadRequest(ex.Message);
             }
 
             return Ok(fileEntity);

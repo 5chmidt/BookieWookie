@@ -1,9 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Diagnostics.CodeAnalysis;
-using System.Text.Json.Serialization;
-
-namespace BookieWookie.API.Entities
+﻿namespace BookieWookie.API.Entities
 {
+    using System.ComponentModel.DataAnnotations;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Text.Json.Serialization;
+
     /// <summary>
     /// Entity framework class for book table.
     /// </summary>
