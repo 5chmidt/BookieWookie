@@ -8,25 +8,57 @@ using System.Reflection;
 
 namespace BookieWookie.API.Services
 {
+    /// <summary>
+    /// Impliments CRUD methods for book model.
+    /// </summary>
     public interface IBookService
     {
+        /// <summary>
+        /// Create a book, users can only publish their own work.
+        /// </summary>
+        /// <param name="request"><see cref="CreateBookRequest"/></param>
+        /// <param name="userId">Unique identifier of current user.</param>
+        /// <returns>Newly created <see cref="Book".</returns>
         Task<Book> Create(CreateBookRequest request, int userId);
+        
+        /// <summary>
+        /// Updates a book and returns the revised model.
+        /// </summary>
+        /// <param name="book"><see cref="Book"/>.</param>
+        /// <param name="userId">Unique identifier of current user.</param>
+        /// <returns>Updated book. <see cref="Book"/></returns>
         Task<Book> Update(Book book, int userId);
+
+        /// <summary>
+        /// Deletes a book from the database (unpublish).
+        /// (Users can only delete books they published.)
+        /// </summary>
+        /// <param name="bookId">Unique identifier of the book to be removed.</param>
+        /// <param name="userId">Unique identifier of the current user.</param>
+        /// <returns>Deleted object.  <see cref="Book"/></returns>
         Task<Book> Delete(int bookId, int userId);
+
+        /// <summary>
+        /// Get books using parameterized query class.
+        /// Any null parameters will not be used to filter the returned set.
+        /// </summary>
+        /// <param name="bookParams"><see cref="BookParameters"/></param>
+        /// <returns>Collection of books based on the input filters.</returns>
         Task<IEnumerable<Book>> Get(BookParameters bookParams);
     }
 
-
+    /// <inheritdoc/>
     public class BookService : IBookService
-
     {
         private readonly IConfiguration Configuration;
-
+        
+        /// <inheritdoc/>
         public BookService(IConfiguration configuration)
         {
             this.Configuration = configuration;
         }
-
+        
+        /// <inheritdoc/>
         public async Task<Book> Create(CreateBookRequest request, int userId)
         {
             var book = new Book()
@@ -51,7 +83,8 @@ namespace BookieWookie.API.Services
 
             return book;
         }
-
+        
+        /// <inheritdoc/>
         public async Task<Book> Delete(int bookId, int userId)
         {
             using (var db = new BookieWookieContext(this.Configuration))
@@ -67,7 +100,8 @@ namespace BookieWookie.API.Services
                 return book;
             }
         }
-
+        
+        /// <inheritdoc/>
         public async Task<IEnumerable<Book>> Get(BookParameters bookParams)
         {
             using (var db = new BookieWookieContext(this.Configuration))
@@ -131,7 +165,8 @@ namespace BookieWookie.API.Services
                 return await books.ToArrayAsync();
             }
         }
-
+        
+        /// <inheritdoc/>
         public async Task<Book> Update(Book book, int userId)
         {
             using (var db = new BookieWookieContext(this.Configuration))
