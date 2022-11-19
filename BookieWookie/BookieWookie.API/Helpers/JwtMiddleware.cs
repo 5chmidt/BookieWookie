@@ -5,15 +5,28 @@
     using System.IdentityModel.Tokens.Jwt;
     using System.Text;
 
+    /// <summary>
+    /// Middleware for attaching jwt authenticated user to the current HTTP context.
+    /// </summary>
     public class JwtMiddleware
     {
         private readonly RequestDelegate _next;
 
+        /// <summary>
+        /// Set the next delegate to call after completion.
+        /// </summary>
+        /// <param name="next"></param>
         public JwtMiddleware(RequestDelegate next)
         {
             _next = next;
         }
 
+        /// <summary>
+        /// Middleware function run prior to each request.
+        /// </summary>
+        /// <param name="context">Currently attached <see cref="HttpContext"/></param>
+        /// <param name="userService">Injected user service to authenticate token.</param>
+        /// <returns>Async Request Delegate.</returns>
         public async Task Invoke(HttpContext context, IUserService userService)
         {
             var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split("Bearer ").Last();
