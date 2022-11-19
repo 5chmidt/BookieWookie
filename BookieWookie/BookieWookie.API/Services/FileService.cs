@@ -1,9 +1,13 @@
 ﻿namespace BookieWookie.API.Services
 {
+    using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
     using System.Threading;
     using System.Threading.Tasks;
 
+    /// <summary>
+    /// Service for CRUD file operations.
+    /// </summary>
     public interface IFileService
     {
         /// <summary>
@@ -19,7 +23,23 @@
         /// </summary>
         /// <param name="fileId">Uniques integer identifier of file</param>
         /// <returns>Byte array of the file read from disk.</returns>
-        Task<byte[]> Get(int fileId);
+        Task<FileContentResult> Get(int fileId);
+
+        /// <summary>
+        /// Update file information.
+        /// </summary>
+        /// <param name="updateFile"><seealso cref="Models.UpdateFileRequest"/></param>
+        /// <param name="userId">Unique identifier of current user.</param>
+        /// <returns><seealso cref="Entities.File"/></returns>
+        Task<Entities.File> Update(Models.UpdateFileRequest updateFile, int userId);
+
+        /// <summary>
+        /// Deletes a file (users can only delete their own files).
+        /// </summary>
+        /// <param name="fileId">Unique identifier of file to delete.</param>
+        /// <param name="userId">Unique identifier of current user.</param>
+        /// <returns><seealso cref="Entities.File"/></returns>
+        Task<Entities.File> Delete(int fileId, int userId);
 
     }
 
@@ -29,6 +49,22 @@
         private IWebHostEnvironment _hostingEnvironment;
 
         private IConfiguration _configuration;
+
+        /// <summary>
+        /// Restrict the types of files uploaded by what can be mapped back to a FileContentResult.
+        /// </summary>
+        private static Dictionary<string, string> contentMap
+        {
+            get
+            {
+                return new Dictionary<string, string> 
+                {
+                    { "jpg", "image"},
+                    { "png", "image"},
+                    { "gif", "image"},
+                };
+            }
+        }
 
         /// <summary>
         /// Initialize file service with dependency injection.
@@ -54,6 +90,12 @@
                 throw new FileLoadException($"Invalid filename: '{file.FileName}' must have an extension.");
             }
 
+            string extension = Path.GetExtension(file.FileName).TrimStart('.');
+            if (contentMap.ContainsKey(extension) == false)
+            {
+                throw new FileLoadException($"Cannot upload files of type {extension}");
+            }
+
             string folder = Path.Combine(
                 _hostingEnvironment.ContentRootPath,
                 "uploads");
@@ -64,43 +106,43 @@
 
             string filePath = Path.Combine(
                 folder,
-                Guid.NewGuid().ToString() + '.' + file.FileName.Split('.').Last());
+                Guid.NewGuid().ToString() + '.' + extension);
 
             // just in case a GUID happens to overlap //
             while (File.Exists(filePath))
             {
                 filePath = Path.Combine(
                     folder,
-                    Guid.NewGuid().ToString() + '.' + file.FileName.Split('.').Last());
+                    Guid.NewGuid().ToString() + '.' + extension);
             }
 
             var fileEntity = new Entities.File()
             {
-                Path = Path.GetFileName(filePath),
+                Path = filePath,
                 FileName = file.FileName,
                 Uploaded = DateTime.Now,
                 UserId = userId,
             };
 
             // TODO: writing file and saving to database can happen at the same time //
-            Task[] tasks = new Task[2];
+            //Task[] tasks = new Task[2];
             using (Stream fileStream = new FileStream(filePath, FileMode.Create))
             {
-                tasks[0] = file.CopyToAsync(fileStream);
+                await file.CopyToAsync(fileStream);
             }
 
             using (var db = new Entities.BookieWookieContext(_configuration))
             {
                 db.Files.Add(fileEntity);
-                tasks[1] = db.SaveChangesAsync();
+                await db.SaveChangesAsync();
             }
             
-            await Task.WhenAll(tasks);
+            //await Task.WhenAll(tasks);
             return fileEntity;
         }
 
         /// <inheritdoc/>
-        public async Task<byte[]> Get(int fileId)
+        public async Task<FileContentResult> Get(int fileId)
         {
             using(var db = new Entities.BookieWookieContext(_configuration))
             {
@@ -110,18 +152,70 @@
                     throw new FileNotFoundException($"Unable to locate file: {file.FileName}");
                 }
 
-                return await File.ReadAllBytesAsync(file.Path);
+                string contentType;
+                string extension = Path.GetExtension(file.FileName).TrimStart('.');
+                if (contentMap.ContainsKey(extension))
+                {
+                    contentType = $"{contentMap[extension]}/{extension}";
+                }
+                else
+                {
+                    throw new FileLoadException($"Cannot get files of type {extension}");
+                }
+
+                byte[] bytes = await File.ReadAllBytesAsync(file.Path);
+                return new FileContentResult(bytes, contentType);
             }
         }
 
-        public async Task<Entities.File> Update(Entities.File file)
+        /// <inheritdoc/>
+        public async Task<Entities.File> Update(Models.UpdateFileRequest updateFile, int userId)
         {
             using (var db = new Entities.BookieWookieContext(_configuration))
             {
+                var file = await db.Files
+                    .Where(f => f.FileId == updateFile.FileId)
+                    .SingleAsync();
+                if (file.UserId != userId)
+                {
+                    throw new UnauthorizedAccessException($"Users can only update files they uploaded.");
+                }
 
+                file.Purpose = updateFile.Purpose;
+                await db.SaveChangesAsync();
+                return file;
             }
+        }
 
-            return file;
+        /// <inheritdoc/>
+        public async Task<Entities.File> Delete(int fileId, int userId)
+        {
+            using (var db = new Entities.BookieWookieContext(_configuration))
+            {
+                var file = await db.Files.Where(f => f.FileId == fileId)
+                    .SingleAsync();
+                if (file.UserId != userId)
+                {
+                    throw new UnauthorizedAccessException($"Users can only delete files they uploaded.");
+                }
+                
+                // if the file does not exist it does not need to be deleted.
+                if (File.Exists(file.Path))
+                {
+                    try
+                    {
+                        File.Delete(file.Path);
+                    }
+                    catch (Exception)
+                    {
+                        throw new IOException($"Unable to delete {file.FileName}");
+                    }
+                }
+                
+                db.Remove(file);
+                await db.SaveChangesAsync();
+                return file;
+            }
         }
     }
 }
