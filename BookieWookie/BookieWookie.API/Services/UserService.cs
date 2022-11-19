@@ -62,6 +62,7 @@
         User GetById(int id);
     }
 
+    /// <inheritdoc/>
     public class UserService : IUserService
     {
         private readonly IConfiguration Configuration;

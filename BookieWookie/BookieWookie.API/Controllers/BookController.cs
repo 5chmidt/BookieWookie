@@ -14,7 +14,7 @@ namespace BookieWookie.API.Controllers
     /// </summary>
     [ApiController]
     [Route("[controller]")]
-    public class BookController : Controller
+    public class BookController : ControllerBase
     {
         private IUserService _userService;
         private IBookService _bookService;
@@ -67,7 +67,8 @@ namespace BookieWookie.API.Controllers
             Book book;
             try
             {
-                book = await _bookService.Create(model, UserId);
+                int userId = this.ParseUserIdFromContext();
+                book = await _bookService.Create(model, userId);
             }
             catch (AuthenticationException ex)
             {
@@ -88,7 +89,8 @@ namespace BookieWookie.API.Controllers
         {
             try
             {
-                book = await _bookService.Update(book, UserId);
+                int userId = this.ParseUserIdFromContext();
+                book = await _bookService.Update(book, userId);
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -114,7 +116,8 @@ namespace BookieWookie.API.Controllers
             Book book;
             try
             {
-                book = await _bookService.Delete(bookId, UserId);
+                int userId = this.ParseUserIdFromContext();
+                book = await _bookService.Delete(bookId, userId);
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -126,23 +129,6 @@ namespace BookieWookie.API.Controllers
             }
 
             return Ok(book);
-        }
-
-        private int UserId { 
-            get
-            {
-                var user = (User?)HttpContext.Items[nameof(Entities.User)];
-                return user == null ? 0 : Convert.ToInt32(user.UserId);
-            } 
-        }
-
-        private PermissionLevel UserPermission
-        {
-            get
-            {
-                var permission = (PermissionLevel?)HttpContext.Items[nameof(PermissionLevel)];
-                return permission == null ? PermissionLevel.None : (PermissionLevel)permission;
-            }
         }
     }
 }

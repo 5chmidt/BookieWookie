@@ -101,6 +101,7 @@
             Entities.User user;
             try
             {
+                int userId = this.ParseUserIdFromContext();
                 user = _userService.UpdateUser(model);
             }
             catch (AuthenticationException ex)
