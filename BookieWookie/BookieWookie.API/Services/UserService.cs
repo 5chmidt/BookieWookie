@@ -15,13 +15,50 @@
     using System.Security.Claims;
     using System.Text;
 
+    /// <summary>
+    /// User service implimenting Authentication and CRUD operations.
+    /// </summary>
     public interface IUserService
     {
+        /// <summary>
+        /// Authenticate hashed credentials and return jwt token if successful.
+        /// </summary>
+        /// <param name="model">Authentication request contains a username/password</param>
+        /// <returns>JWT token if user was successfully authenticated.</returns>
         Task<JWTTokenResponse> Authenticate(AuthenticateRequest model);
+
+        /// <summary>
+        /// Create a new user and securely stores credentials.
+        /// </summary>
+        /// <param name="model"><seealso cref="UserRequest"/></param>
+        /// <returns>JWT token if user was successfully created.</returns>
         JWTTokenResponse CreateUser(UserRequest model);
+        
+        /// <summary>
+        /// Deletes a user from the database, (users can only remove themselves).
+        /// </summary>
+        /// <param name="id">Unique identifier for user.</param>
+        /// <returns>User object that was deleted.</returns>
         User DeleteUser(int id);
+        
+        /// <summary>
+        /// Updates a user model, if new password input rehash/salt credentials.
+        /// </summary>
+        /// <param name="model"><seealso cref="UserRequest"/></param>
+        /// <returns><seealso cref="User"/></returns>
         User UpdateUser(UserRequest model);
+        
+        /// <summary>
+        /// Admin only function hidden from swagger UI to get all users.
+        /// </summary>
+        /// <returns>Collection of user objects.</returns>
         IEnumerable<User> GetAll();
+        
+        /// <summary>
+        /// Gets information of a single user by user id.
+        /// </summary>
+        /// <param name="id">Unique identifier for each user.</param>
+        /// <returns><seealso cref="User"/></returns>
         User GetById(int id);
     }
 
@@ -31,12 +68,18 @@
 
         private readonly IAuthenticationService Authentication;
 
+        /// <summary>
+        /// Initialize user service with dependency injection.
+        /// </summary>
+        /// <param name="authenticationService">Authentication service used to for secure password hashing.</param>
+        /// <param name="configuration">Configuration used when making db queries.</param>
         public UserService(IAuthenticationService authenticationService, IConfiguration configuration)
         {
             this.Configuration = configuration;
             this.Authentication = authenticationService;
         }
-
+        
+        /// <inheritdoc/>
         public async Task<JWTTokenResponse> Authenticate(AuthenticateRequest model)
         {
             // find user in database //
@@ -69,6 +112,7 @@
             return IssueToken(claims);
         }
 
+        /// <inheritdoc/>
         public JWTTokenResponse CreateUser(UserRequest model)
         {
             var user = new User();
@@ -101,7 +145,8 @@
             };
             return IssueToken(claims);
         }
-
+        
+        /// <inheritdoc/>
         public User UpdateUser(UserRequest model)
         {
             var user = new User();
@@ -164,7 +209,8 @@
 
             return user;
         }
-
+        
+        /// <inheritdoc/>
         public User DeleteUser(int id)
         {
             var user = new User();
@@ -182,7 +228,8 @@
 
             return user;
         }
-
+        
+        /// <inheritdoc/>
         public IEnumerable<User> GetAll()
         {
             using (var db = new BookieWookieContext(this.Configuration))
@@ -190,7 +237,8 @@
                 return db.Users.ToArray();
             }
         }
-
+        
+        /// <inheritdoc/>
         public User GetById(int id)
         {
             using (var db = new BookieWookieContext(this.Configuration))
@@ -198,7 +246,8 @@
                 return db.Users.Single(u => u.UserId == id);
             }
         }
-
+        
+        /// <inheritdoc/>
         private JWTTokenResponse IssueToken(Claim[] claims)
         {
             var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
