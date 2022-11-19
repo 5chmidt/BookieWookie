@@ -2,8 +2,17 @@
 
 namespace BookieWookie.API.Authorization
 {
+    /// <summary>
+    /// Class for granting authoriation to users.
+    /// </summary>
     public class Authorize
     {
+        /// <summary>
+        /// Static method to get simple permissions.
+        /// To be replaced by permissions granted from database.
+        /// </summary>
+        /// <param name="user"><see cref="User"/></param>
+        /// <returns><see cref="PermissionLevel"/></returns>
         public static PermissionLevel GetPermissionLevel(User user)
         {
             
