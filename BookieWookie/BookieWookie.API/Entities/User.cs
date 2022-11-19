@@ -1,6 +1,5 @@
 ﻿namespace BookieWookie.API.Entities
 {
-    using Microsoft.EntityFrameworkCore;
     using System.ComponentModel.DataAnnotations;
     using System.Diagnostics.CodeAnalysis;
     using System.Text.Json.Serialization;
