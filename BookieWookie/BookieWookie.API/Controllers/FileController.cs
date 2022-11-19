@@ -21,6 +21,7 @@ namespace BookieWookie.API.Controllers
         /// Initialize FileController with dependency injection.
         /// </summary>
         /// <param name="configuration"></param>
+        /// <param name="fileService"></param>
         public FileController(IConfiguration configuration, IFileService fileService)
         {
             _configuration = configuration;
@@ -67,7 +68,7 @@ namespace BookieWookie.API.Controllers
         /// Gets an uploaded file.
         /// </summary>
         /// <param name="fileId">Unique identifier for uploaded file.</param>
-        /// <returns><seealso cref="FileContentResult"/></returns>
+        /// <returns><see cref="FileContentResult"/></returns>
         [HttpGet("{fileId}")]
         [AuthorizeOwner]
         public async Task<ActionResult> Get(int fileId)
