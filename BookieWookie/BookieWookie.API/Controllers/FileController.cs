@@ -39,7 +39,7 @@ namespace BookieWookie.API.Controllers
             try
             {
                 int userId = this.ParseUserIdFromContext();
-                fileEntity = await _fileService.Upload(file, userId);
+                fileEntity = await _fileService.Create(file, userId);
             }
             catch (FileLoadException ex)
             {
@@ -47,7 +47,13 @@ namespace BookieWookie.API.Controllers
             }
             catch(DbUpdateException ex)
             {
-                return BadRequest(ex.Message + Environment.NewLine + ex.InnerException.Message);
+                string msg = ex.Message;
+                if (ex.InnerException != null)
+                {
+                    msg += Environment.NewLine + ex.InnerException.Message;
+                }
+
+                return BadRequest(msg);
             }
             catch (Exception ex)
             {
