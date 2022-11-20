@@ -52,9 +52,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme,
         options => builder.Configuration.Bind("JwtSettings", options));
 
-// add authorization handlers //
-
-
 // configure DI for application services
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IBookService, BookService>();
@@ -64,7 +61,7 @@ builder.Services.AddScoped<IFileService, FileService>();
 var app = builder.Build();
 
 // user auth middle ware //
-//app.UseMiddleware<SwaggerBasicAuthMiddleware>();
+app.UseMiddleware<SwaggerBasicAuthMiddleware>();
 app.UseMiddleware<JwtMiddleware>();
 
 // Configure the HTTP request pipeline.

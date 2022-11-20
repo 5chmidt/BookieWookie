@@ -61,7 +61,7 @@
                 // parse permission level from token //
                 var permission = API.Authorization.PermissionLevel.None;
                 string permissionName = jwtToken.Claims.First(x => x.Type == nameof(API.Authorization.PermissionLevel)).Value;
-                Enum.TryParse(permissionName, out permission);
+                bool result = Enum.TryParse(permissionName, out permission);
 
                 // attach to context on successful jwt validation
                 context.Items[nameof(Entities.User)] = userService.GetById(userId);

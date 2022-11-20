@@ -33,7 +33,7 @@ namespace BookieWookie.API.Helpers
         {
             if (context.Request.Path.StartsWithSegments("/swagger"))
             {
-                await this.displayDefaultLogin(context, userService);
+                await this.DisplayDefaultLogin(context, userService);
             }
             else
             {
@@ -41,7 +41,7 @@ namespace BookieWookie.API.Helpers
             }
         }
 
-        private async Task displayDefaultLogin(HttpContext context, IUserService userService)
+        private async Task DisplayDefaultLogin(HttpContext context, IUserService userService)
         {
             string authHeader = context.Request.Headers["Authorization"];
             if (authHeader != null && authHeader.StartsWith("Basic "))
