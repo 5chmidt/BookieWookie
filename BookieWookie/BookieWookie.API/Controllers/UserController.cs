@@ -73,7 +73,7 @@
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpPost("Create")]
-        public IActionResult Create(UserRequest model)
+        public IActionResult Create(CreateUserRequest model)
         {
             JWTTokenResponse responce;
             try
@@ -96,13 +96,13 @@
         /// <returns></returns>
         [AuthorizeOwner]
         [HttpPost("Update")]
-        public IActionResult Update(UserRequest model)
+        public IActionResult Update(UpdateUserRequest model)
         {
             Entities.User user;
             try
             {
                 int userId = this.ParseUserIdFromContext();
-                user = _userService.UpdateUser(model);
+                user = _userService.UpdateUser(model, userId);
             }
             catch (AuthenticationException ex)
             {
@@ -124,7 +124,8 @@
             Entities.User model;
             try
             {
-                model = _userService.DeleteUser(id);
+                int userId = this.ParseUserIdFromContext();
+                model = _userService.DeleteUser(id, userId);
             }
             catch (AuthenticationException ex)
             {

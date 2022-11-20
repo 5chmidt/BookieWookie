@@ -3,21 +3,27 @@
 namespace BookieWookie.API.Models
 {
     /// <summary>
-    /// User request used to create a user.
+    /// User request used to update a user.
     /// </summary>
-    public class CreateUserRequest
+    public class UpdateUserRequest
     {
         /// <summary>
-        /// Username, must be unique among accounts can only contain letters and number.
+        /// Unique identifier for user.
         /// </summary>
         [Required]
-        public string Username { get; set; }
+        public int UserId { get; set; }
 
         /// <summary>
-        /// Password, must meet complexity criteria.
+        /// Username must be less than 50 charectors and only contain letters and numbers.
         /// </summary>
         [Required]
-        public string Password { get; set; }
+        public string? Username { get; set; }
+
+        /// <summary>
+        /// Password must meet complexity requirements.
+        /// </summary>
+        [Required]
+        public string? Password { get; set; }
 
         /// <summary>
         /// Author's first name.
@@ -30,7 +36,7 @@ namespace BookieWookie.API.Models
         public string? LastName { get; set; }
 
         /// <summary>
-        /// Author's psuedonym.
+        /// Author's pseudonym.
         /// </summary>
         public string? Pseudonym { get; set; }
     }
