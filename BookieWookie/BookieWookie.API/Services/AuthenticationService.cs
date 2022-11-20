@@ -120,9 +120,10 @@ namespace BookieWookie.API.Services
         /// Check user password meets requirements.
         /// </summary>
         /// <param name="password">Password user is attmepting to set.</param>
+        /// <param name="throwException">If true an exception will be thrown otherwise return false.</param>
         /// <returns>True if successful, else throws an exception.</returns>
         /// <exception cref="AuthenticationException"></exception>
-        public static bool CheckPasswordRequirements(string? password)
+        public static bool CheckPasswordRequirements(string? password, bool throwException = true)
         {
             //TODO: move to app.settings //
             int minLength = 8;
@@ -130,7 +131,14 @@ namespace BookieWookie.API.Services
             // set the most basic password of requirements //
             if (password == null || password.Length < minLength)
             {
-                throw new AuthenticationException($"Password must be at least 8 charectors long.");
+                if (throwException)
+                {
+                    throw new AuthenticationException($"Password must be at least 8 charectors long.");
+                }
+                else
+                {
+                    return false;
+                }
             }
 
             return true;
