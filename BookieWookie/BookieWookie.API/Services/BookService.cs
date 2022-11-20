@@ -18,7 +18,7 @@ namespace BookieWookie.API.Services
         /// </summary>
         /// <param name="request"><see cref="CreateBookRequest"/></param>
         /// <param name="userId">Unique identifier of current user.</param>
-        /// <returns>Newly created <see cref="Book".</returns>
+        /// <returns>Newly created <see cref="Book"/>.</returns>
         Task<Book> Create(CreateBookRequest request, int userId);
         
         /// <summary>
@@ -116,7 +116,7 @@ namespace BookieWookie.API.Services
                     }
 
                     // query mapping //
-                    if (property.Name == nameof(BookParameters.Id))
+                    if (property.Name == nameof(BookParameters.BookId))
                     {
                         books = books.Where(b => b.BookId == (int)value);
                     }

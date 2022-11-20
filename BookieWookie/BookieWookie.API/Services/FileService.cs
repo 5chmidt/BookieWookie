@@ -28,9 +28,9 @@
         /// <summary>
         /// Update file information.
         /// </summary>
-        /// <param name="updateFile"><seealso cref="Models.UpdateFileRequest"/></param>
+        /// <param name="updateFile"><see cref="Models.UpdateFileRequest"/></param>
         /// <param name="userId">Unique identifier of current user.</param>
-        /// <returns><seealso cref="Entities.File"/></returns>
+        /// <returns><see cref="Entities.File"/></returns>
         Task<Entities.File> Update(Models.UpdateFileRequest updateFile, int userId);
 
         /// <summary>
@@ -38,7 +38,7 @@
         /// </summary>
         /// <param name="fileId">Unique identifier of file to delete.</param>
         /// <param name="userId">Unique identifier of current user.</param>
-        /// <returns><seealso cref="Entities.File"/></returns>
+        /// <returns><see cref="Entities.File"/></returns>
         Task<Entities.File> Delete(int fileId, int userId);
 
     }

@@ -25,28 +25,30 @@
         /// </summary>
         /// <param name="model">Authentication request contains a username/password</param>
         /// <returns>JWT token if user was successfully authenticated.</returns>
-        Task<JWTTokenResponse> Authenticate(AuthenticateRequest model);
+        Task<JWTTokenResponse?> Authenticate(AuthenticateRequest model);
 
         /// <summary>
         /// Create a new user and securely stores credentials.
         /// </summary>
-        /// <param name="model"><seealso cref="UserRequest"/></param>
+        /// <param name="model"><see cref="UpdateUserRequest"/></param>
         /// <returns>JWT token if user was successfully created.</returns>
-        JWTTokenResponse CreateUser(UserRequest model);
-        
+        JWTTokenResponse CreateUser(CreateUserRequest model);
+
         /// <summary>
         /// Deletes a user from the database, (users can only remove themselves).
         /// </summary>
         /// <param name="id">Unique identifier for user.</param>
+        /// <param name="userId">Currently logged in user.</param>
         /// <returns>User object that was deleted.</returns>
-        User DeleteUser(int id);
-        
+        User DeleteUser(int id, int userId);
+
         /// <summary>
         /// Updates a user model, if new password input rehash/salt credentials.
         /// </summary>
-        /// <param name="model"><seealso cref="UserRequest"/></param>
-        /// <returns><seealso cref="User"/></returns>
-        User UpdateUser(UserRequest model);
+        /// <param name="model"><see cref="UpdateUserRequest"/></param>
+        /// <param name="userId">Id of currently authenticated user.</param>
+        /// <returns><see cref="User"/></returns>
+        User UpdateUser(UpdateUserRequest model, int userId);
         
         /// <summary>
         /// Admin only function hidden from swagger UI to get all users.
@@ -58,7 +60,7 @@
         /// Gets information of a single user by user id.
         /// </summary>
         /// <param name="id">Unique identifier for each user.</param>
-        /// <returns><seealso cref="User"/></returns>
+        /// <returns><see cref="User"/></returns>
         User GetById(int id);
     }
 
@@ -81,13 +83,13 @@
         }
         
         /// <inheritdoc/>
-        public async Task<JWTTokenResponse> Authenticate(AuthenticateRequest model)
+        public async Task<JWTTokenResponse?> Authenticate(AuthenticateRequest model)
         {
             // find user in database //
             User? user;
             using (var db = new BookieWookieContext(this.Configuration))
             {
-                user = await db.Users.SingleOrDefaultAsync(x => x.Username == model.Username);
+                user = await db.Users.SingleOrDefaultAsync(x => x.Username.ToLower() == model.Username.ToLower());
             }
 
             // return null if user not found
@@ -114,25 +116,43 @@
         }
 
         /// <inheritdoc/>
-        public JWTTokenResponse CreateUser(UserRequest model)
+        public JWTTokenResponse CreateUser(CreateUserRequest model)
         {
+            //username is not case sensitive //
+            model.Username = model.Username.ToLower();
+
+            if (string.IsNullOrEmpty(model.Username))
+            {
+                throw new AuthenticationException($"Username cannot be null.");
+            }
+
+            string regex = @"/^[0-Z]{1,50}$/";
+            if (System.Text.RegularExpressions.Regex.IsMatch(model.Username, regex) == false)
+            {
+                throw new AuthenticationException($"Username can only contian letters and numbers");
+            }
+
             var user = new User();
             using (var db = new BookieWookieContext(this.Configuration))
             {
+                // throw exception if checks do not pass //
                 if (db.Users.Where(u => u.Username == model.Username).Count() > 0)
                 {
                     throw new AuthenticationException($"Username '{model.Username}' already exists");
                 }
-
-                // throw exception if checks do not pass //
-                AuthenticationService.CheckPasswordRequirements(model.Password);
-
+             
                 user.Username = model.Username;
                 user.FirstName = model.FirstName;
                 user.LastName = model.LastName;
                 user.Pseudonym = model.Pseudonym;
-                user.Salt = this.Authentication.CreateSalt();
-                user.Hash = this.Authentication.HashPassword(model.Password, user.Salt);
+                
+                if (string.IsNullOrEmpty(model.Password) == false)
+                {
+                    AuthenticationService.CheckPasswordRequirements(model.Password);
+                    user.Salt = this.Authentication.CreateSalt();
+                    user.Hash = this.Authentication.HashPassword(model.Password, user.Salt);
+                }
+
                 db.Users.Add(user);
                 db.SaveChanges();
             }
@@ -148,8 +168,16 @@
         }
         
         /// <inheritdoc/>
-        public User UpdateUser(UserRequest model)
+        public User UpdateUser(UpdateUserRequest model, int userId)
         {
+            //username is not case sensitive //
+            model.Username = model.Username.ToLower();
+
+            if (model.UserId != userId)
+            {
+                throw new AuthenticationException("Users can only update their own profile.");
+            }
+
             var user = new User();
             using (var db = new BookieWookieContext(this.Configuration))
             {
@@ -205,15 +233,23 @@
                     updated = true;
                 }
 
-                db.SaveChanges();
+                if (updated)
+                {
+                    db.SaveChanges();
+                }
             }
 
             return user;
         }
         
         /// <inheritdoc/>
-        public User DeleteUser(int id)
+        public User DeleteUser(int id, int userId)
         {
+            if (id != userId)
+            {
+                throw new AuthenticationException($"Users can only delete themselves.");
+            }
+
             var user = new User();
             using (var db = new BookieWookieContext(this.Configuration))
             {
