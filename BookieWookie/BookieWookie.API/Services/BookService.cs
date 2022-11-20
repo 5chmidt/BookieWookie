@@ -50,12 +50,15 @@ namespace BookieWookie.API.Services
     /// <inheritdoc/>
     public class BookService : IBookService
     {
-        private readonly IConfiguration Configuration;
+        private readonly IConfiguration configuration;
         
+        private readonly BookieWookieContext context;
+
         /// <inheritdoc/>
-        public BookService(IConfiguration configuration)
+        public BookService(IConfiguration _configuration, BookieWookieContext _context)
         {
-            this.Configuration = configuration;
+            this.configuration = _configuration;
+            this.context = _context;
         }
         
         /// <inheritdoc/>
@@ -69,117 +72,104 @@ namespace BookieWookie.API.Services
                 UserId = userId,
             };
 
-            using (var db = new BookieWookieContext(this.Configuration))
+            if (await this.context.Books.Where(b => b.Title == request.Title).AnyAsync())
             {
-                if (await db.Books.Where(b => b.Title == request.Title).AnyAsync())
-                {
-                    string msg = $"Books cannot share titles, '{request.Title}' already exists.";
-                    throw new InvalidDataException(msg);
-                }
-
-                db.Books.Add(book);
-                await db.SaveChangesAsync();
+                string msg = $"Books cannot share titles, '{request.Title}' already exists.";
+                throw new InvalidDataException(msg);
             }
 
+            this.context.Books.Add(book);
+            await this.context.SaveChangesAsync();
             return book;
         }
         
         /// <inheritdoc/>
         public async Task<Book> Delete(int bookId, int userId)
         {
-            using (var db = new BookieWookieContext(this.Configuration))
+            Book book = await this.context.Books.SingleAsync(b => b.BookId == bookId);
+            if (book.UserId != userId)
             {
-                Book book = await db.Books.SingleAsync(b => b.BookId == bookId);
-                if (book.UserId != userId)
-                {
-                    throw new UnauthorizedAccessException($"Authors can only remove their own books.");
-                }
-
-                db.Books.Remove(book);
-                await db.SaveChangesAsync();
-                return book;
+                throw new UnauthorizedAccessException($"Authors can only remove their own books.");
             }
+
+            this.context.Books.Remove(book);
+            await this.context.SaveChangesAsync();
+            return book;
         }
         
         /// <inheritdoc/>
         public async Task<IEnumerable<Book>> Get(BookParameters bookParams)
         {
-            using (var db = new BookieWookieContext(this.Configuration))
+            var books = this.context.Books.AsQueryable();
+            foreach (PropertyInfo property in bookParams.GetType().GetRuntimeProperties())
             {
-                var books = db.Books.AsQueryable();
-                foreach (PropertyInfo property in bookParams.GetType().GetRuntimeProperties())
+                object? value = property.GetValue(bookParams, null);
+                if (value == null)
                 {
-                    object? value = property.GetValue(bookParams, null);
-                    if (value == null)
-                    {
-                        continue;
-                    }
-
-                    // query mapping //
-                    if (property.Name == nameof(BookParameters.BookId))
-                    {
-                        books = books.Where(b => b.BookId == (int)value);
-                    }
-                    else if(property.Name == nameof(BookParameters.AuthorId))
-                    {
-                        books = books.Where(b => b.UserId == (int)value);
-                    }
-                    else if (property.Name == nameof(BookParameters.TitleContains))
-                    {
-                        books = books.Where(b => b.Title.Contains((string)value));
-                    }
-                    else if(property.Name == nameof(BookParameters.TitleEquals))
-                    {
-                        books = books.Where(b => b.Title == (string)value);
-                    }
-                    else if (property.Name == nameof(BookParameters.Description))
-                    {
-                        books = books.Where(b => b.Description.Contains((string)value));
-                    }
-                    else if (property.Name == nameof(BookParameters.AuthorFirstName))
-                    {
-                        books = books.Where(b => b.User.FirstName == (string)value);
-                    }
-                    else if (property.Name == nameof(BookParameters.AuthorLastName))
-                    {
-                        books = books.Where(b => b.User.LastName == (string)value);
-                    }
-                    else if (property.Name == nameof(BookParameters.AuthorPseudonym))
-                    {
-                        books = books.Where(b => b.User.Pseudonym == (string)value);
-                    }
-                    else if (property.Name == nameof(BookParameters.CreateBefore))
-                    {
-                        books = books.Where(b => b.CreatedAt <= (DateTime)value);
-                    }
-                    else if (property.Name == nameof(BookParameters.CreatedAfter))
-                    {
-                        books = books.Where(b => b.CreatedAt >= (DateTime)value);
-                    }
-                    else if (property.Name == nameof(BookParameters.CreatedOn))
-                    {
-                        books = books.Where(b => b.CreatedAt.Date == (DateTime)value);
-                    }
+                    continue;
                 }
 
-                return await books.ToArrayAsync();
+                // query mapping //
+                if (property.Name == nameof(BookParameters.BookId))
+                {
+                    books = books.Where(b => b.BookId == (int)value);
+                }
+                else if(property.Name == nameof(BookParameters.AuthorId))
+                {
+                    books = books.Where(b => b.UserId == (int)value);
+                }
+                else if (property.Name == nameof(BookParameters.TitleContains))
+                {
+                    books = books.Where(b => b.Title.Contains((string)value));
+                }
+                else if(property.Name == nameof(BookParameters.TitleEquals))
+                {
+                    books = books.Where(b => b.Title == (string)value);
+                }
+                else if (property.Name == nameof(BookParameters.Description))
+                {
+                    books = books.Where(b => b.Description.Contains((string)value));
+                }
+                else if (property.Name == nameof(BookParameters.AuthorFirstName))
+                {
+                    books = books.Where(b => b.User.FirstName == (string)value);
+                }
+                else if (property.Name == nameof(BookParameters.AuthorLastName))
+                {
+                    books = books.Where(b => b.User.LastName == (string)value);
+                }
+                else if (property.Name == nameof(BookParameters.AuthorPseudonym))
+                {
+                    books = books.Where(b => b.User.Pseudonym == (string)value);
+                }
+                else if (property.Name == nameof(BookParameters.CreateBefore))
+                {
+                    books = books.Where(b => b.CreatedAt <= (DateTime)value);
+                }
+                else if (property.Name == nameof(BookParameters.CreatedAfter))
+                {
+                    books = books.Where(b => b.CreatedAt >= (DateTime)value);
+                }
+                else if (property.Name == nameof(BookParameters.CreatedOn))
+                {
+                    books = books.Where(b => b.CreatedAt.Date == (DateTime)value);
+                }
             }
+
+            return await books.ToArrayAsync();
         }
         
         /// <inheritdoc/>
         public async Task<Book> Update(Book book, int userId)
         {
-            using (var db = new BookieWookieContext(this.Configuration))
+            if (book.UserId != userId)
             {
-                if (book.UserId != userId)
-                {
-                    throw new UnauthorizedAccessException($"Authors can only remove their own books.");
-                }
-
-                db.Entry<Book>(book).State = EntityState.Modified;
-                await db.SaveChangesAsync();
-                return book;
+                throw new UnauthorizedAccessException($"Authors can only remove their own books.");
             }
+
+            this.context.Entry<Book>(book).State = EntityState.Modified;
+            await this.context.SaveChangesAsync();
+            return book;
         }
     }
 }

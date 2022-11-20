@@ -1,5 +1,6 @@
 ﻿namespace BookieWookie.API.Services
 {
+    using BookieWookie.API.Entities;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
     using System.Threading;
@@ -46,9 +47,11 @@
     /// <inheritdoc/>
     public class FileService : IFileService
     {
-        private IWebHostEnvironment _hostingEnvironment;
+        private IWebHostEnvironment hostingEnvironment;
 
-        private IConfiguration _configuration;
+        private IConfiguration configuration;
+
+        private BookieWookieContext context;
 
         /// <summary>
         /// Restrict the types of files uploaded by what can be mapped back to a FileContentResult.
@@ -69,12 +72,17 @@
         /// <summary>
         /// Initialize file service with dependency injection.
         /// </summary>
-        /// <param name="hostingEnvironment">Hosting enviroment so files can be saved.</param>
-        /// <param name="configuration"></param>
-        public FileService(IWebHostEnvironment hostingEnvironment, IConfiguration configuration)
+        /// <param name="_hostingEnvironment">Hosting enviroment so files can be saved.</param>
+        /// <param name="_configuration">Inject configuration settings.</param>
+        /// <param name="_context">Inject db context for entity framework.</param>
+        public FileService(
+            IWebHostEnvironment _hostingEnvironment, 
+            IConfiguration _configuration,
+            BookieWookieContext _context)
         {
-            _hostingEnvironment = hostingEnvironment;
-            _configuration = configuration;
+            this.hostingEnvironment = _hostingEnvironment;
+            this.configuration = _configuration;
+            this.context = _context;
         }
 
         /// <inheritdoc/>
@@ -97,7 +105,7 @@
             }
 
             string folder = Path.Combine(
-                _hostingEnvironment.ContentRootPath,
+                hostingEnvironment.ContentRootPath,
                 "uploads");
             if (Directory.Exists(folder) == false)
             {
@@ -109,7 +117,7 @@
                 Guid.NewGuid().ToString() + '.' + extension);
 
             // just in case a GUID happens to overlap //
-            while (File.Exists(filePath))
+            while (System.IO.File.Exists(filePath))
             {
                 filePath = Path.Combine(
                     folder,
@@ -131,11 +139,8 @@
                 await file.CopyToAsync(fileStream);
             }
 
-            using (var db = new Entities.BookieWookieContext(_configuration))
-            {
-                db.Files.Add(fileEntity);
-                await db.SaveChangesAsync();
-            }
+            this.context.Files.Add(fileEntity);
+            await this.context.SaveChangesAsync();
             
             //await Task.WhenAll(tasks);
             return fileEntity;
@@ -144,78 +149,69 @@
         /// <inheritdoc/>
         public async Task<FileContentResult> Get(int fileId)
         {
-            using(var db = new Entities.BookieWookieContext(_configuration))
+            var file = await this.context.Files.Where(f => f.FileId == fileId).SingleAsync();
+            if (System.IO.File.Exists(file.Path) == false)
             {
-                var file = await db.Files.Where(f => f.FileId == fileId).SingleAsync();
-                if (File.Exists(file.Path) == false)
-                {
-                    throw new FileNotFoundException($"Unable to locate file: {file.FileName}");
-                }
-
-                string contentType;
-                string extension = Path.GetExtension(file.FileName).TrimStart('.');
-                if (contentMap.ContainsKey(extension))
-                {
-                    contentType = $"{contentMap[extension]}/{extension}";
-                }
-                else
-                {
-                    throw new FileLoadException($"Cannot get files of type {extension}");
-                }
-
-                byte[] bytes = await File.ReadAllBytesAsync(file.Path);
-                return new FileContentResult(bytes, contentType);
+                throw new FileNotFoundException($"Unable to locate file: {file.FileName}");
             }
+
+            string contentType;
+            string extension = Path.GetExtension(file.FileName).TrimStart('.');
+            if (contentMap.ContainsKey(extension))
+            {
+                contentType = $"{contentMap[extension]}/{extension}";
+            }
+            else
+            {
+                throw new FileLoadException($"Cannot get files of type {extension}");
+            }
+
+            byte[] bytes = await System.IO.File.ReadAllBytesAsync(file.Path);
+            return new FileContentResult(bytes, contentType);
         }
 
         /// <inheritdoc/>
         public async Task<Entities.File> Update(Models.UpdateFileRequest updateFile, int userId)
         {
-            using (var db = new Entities.BookieWookieContext(_configuration))
+            var file = await this.context.Files
+                .Where(f => f.FileId == updateFile.FileId)
+                .SingleAsync();
+            if (file.UserId != userId)
             {
-                var file = await db.Files
-                    .Where(f => f.FileId == updateFile.FileId)
-                    .SingleAsync();
-                if (file.UserId != userId)
-                {
-                    throw new UnauthorizedAccessException($"Users can only update files they uploaded.");
-                }
-
-                file.Purpose = updateFile.Purpose;
-                await db.SaveChangesAsync();
-                return file;
+                throw new UnauthorizedAccessException($"Users can only update files they uploaded.");
             }
+
+            file.Purpose = updateFile.Purpose;
+            await this.context.SaveChangesAsync();
+            return file;
         }
 
         /// <inheritdoc/>
         public async Task<Entities.File> Delete(int fileId, int userId)
         {
-            using (var db = new Entities.BookieWookieContext(_configuration))
+            var file = await this.context.Files.Where(f => f.FileId == fileId)
+                .SingleAsync();
+            if (file.UserId != userId)
             {
-                var file = await db.Files.Where(f => f.FileId == fileId)
-                    .SingleAsync();
-                if (file.UserId != userId)
-                {
-                    throw new UnauthorizedAccessException($"Users can only delete files they uploaded.");
-                }
-                
-                // if the file does not exist it does not need to be deleted.
-                if (File.Exists(file.Path))
-                {
-                    try
-                    {
-                        File.Delete(file.Path);
-                    }
-                    catch (Exception)
-                    {
-                        throw new IOException($"Unable to delete {file.FileName}");
-                    }
-                }
-                
-                db.Remove(file);
-                await db.SaveChangesAsync();
-                return file;
+                throw new UnauthorizedAccessException($"Users can only delete files they uploaded.");
             }
+                
+            // if the file does not exist it does not need to be deleted.
+            if (System.IO.File.Exists(file.Path))
+            {
+                try
+                {
+                    System.IO.File.Delete(file.Path);
+                }
+                catch (Exception)
+                {
+                    throw new IOException($"Unable to delete {file.FileName}");
+                }
+            }
+                
+            this.context.Remove(file);
+            await this.context.SaveChangesAsync();
+            return file;
         }
     }
 }
