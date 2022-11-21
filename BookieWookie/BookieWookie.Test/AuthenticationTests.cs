@@ -68,7 +68,7 @@ namespace BookieWookie.Test
         [Test]
         public void NullPasswordTest()
         {
-            string password = null;
+            string? password = null;
             bool result = CheckPasswordRequirements(password, false);
             Assert.That(result, Is.False);
         }
