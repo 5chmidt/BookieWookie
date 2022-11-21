@@ -131,7 +131,7 @@
                 throw new AuthenticationException($"Username cannot be null.");
             }
 
-            string regex = @"/^[0-Z]{1,50}$/";
+            string regex = @"[0-z]{1,50}";
             if (System.Text.RegularExpressions.Regex.IsMatch(model.Username, regex) == false)
             {
                 throw new AuthenticationException($"Username can only contian letters and numbers");

@@ -4,14 +4,17 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Reflection;
 using Microsoft.OpenApi.Models;
 using BookieWookie.API.Entities;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
 
+
 // add DbContext //
-builder.Services.AddDbContext<BookieWookieContext>();
+string defaultConnection = "Data Source=localhost\\SQLEXPRESS;Initial Catalog=BookieWookie_Development;Integrated Security=True";
+builder.Services.AddDbContext<BookieWookieContext>(options => options.UseSqlServer(defaultConnection));
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

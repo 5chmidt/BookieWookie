@@ -3,6 +3,7 @@ namespace BookieWookie.API.Entities
 {
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Options;
+    using System;
     using System.Collections.Generic;
 
     /// <summary>
@@ -10,15 +11,12 @@ namespace BookieWookie.API.Entities
     /// </summary>
     public class BookieWookieContext : DbContext
     {
-        private readonly IConfiguration _configuration;
-
         /// <summary>
-        /// Initialize db context with dependency injection.
+        /// Initialize db context with context options.
         /// </summary>
-        /// <param name="configuration"></param>
-        public BookieWookieContext(IConfiguration configuration)
+        public BookieWookieContext(DbContextOptions<BookieWookieContext> options) : base(options)
         {
-            _configuration = configuration;
+
         }
 
         /// <summary>
@@ -35,15 +33,5 @@ namespace BookieWookie.API.Entities
         /// Dbset for file model. <see cref="File"/>
         /// </summary>
         public virtual DbSet<File> Files { get; set; }
-
-        /// <summary>
-        /// Override with db context connection string from configuration.
-        /// </summary>
-        /// <param name="options"><see cref="DbContextOptions"/></param>
-        protected override void OnConfiguring(DbContextOptionsBuilder options)
-        {
-            options.UseSqlServer(_configuration.GetConnectionString("DefaultConnection"));
-        }
-
     }
 }

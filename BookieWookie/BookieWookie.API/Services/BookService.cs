@@ -50,14 +50,11 @@ namespace BookieWookie.API.Services
     /// <inheritdoc/>
     public class BookService : IBookService
     {
-        private readonly IConfiguration configuration;
-        
         private readonly BookieWookieContext context;
 
         /// <inheritdoc/>
-        public BookService(IConfiguration _configuration, BookieWookieContext _context)
+        public BookService(BookieWookieContext _context)
         {
-            this.configuration = _configuration;
             this.context = _context;
         }
         

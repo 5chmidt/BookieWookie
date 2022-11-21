@@ -49,8 +49,6 @@
     {
         private IWebHostEnvironment hostingEnvironment;
 
-        private IConfiguration configuration;
-
         private BookieWookieContext context;
 
         /// <summary>
@@ -77,11 +75,9 @@
         /// <param name="_context">Inject db context for entity framework.</param>
         public FileService(
             IWebHostEnvironment _hostingEnvironment, 
-            IConfiguration _configuration,
             BookieWookieContext _context)
         {
             this.hostingEnvironment = _hostingEnvironment;
-            this.configuration = _configuration;
             this.context = _context;
         }
 
