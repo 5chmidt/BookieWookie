@@ -1,17 +1,6 @@
 ﻿ToDoList
-API EndPoints:
-	/file/upload/  (upload cover images)
-
-Add Authorization to Endpoints:
-	/user/update/
-	/user/delete/
-	/user/getall/
 
 Controller Unit Tests:
-	/book/get
-	/book/create
-	/book/update
-	/book/delete
 
 	/user/get
 	/user/authenticate/
@@ -20,11 +9,6 @@ Controller Unit Tests:
 	/user/delete/
 
 	/file/upload/
-	
-XML Comment Documentation for Schemas
-	AuthenticationRequest
-	CreateBookRequest
-	UserRequest
 
 
 DevOps Wishlist

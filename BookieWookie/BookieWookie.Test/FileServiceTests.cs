@@ -119,13 +119,55 @@
         [Test]
         public void UpdateOthersFileTest()
         {
+            // setup file to upload //
+            Stream stream = new MemoryStream(Resources.wookie_image_1);
+            IFormFile file = new FormFile(stream, 0, Resources.wookie_image_1.LongLength, "WookieImage.jpg", "WookieImage.jpg");
 
+            // upload image using file service //
+            var task = this.fileService.Create(file, this.alice.UserId);
+            task.Wait();
+
+            string id = Guid.NewGuid().ToString();
+            var updateFileRequest = new UpdateFileRequest()
+            {
+                FileId = task.Result.FileId,
+                Purpose = id,
+            };
+
+            try
+            {
+                var update = this.fileService.Update(updateFileRequest, this.bob.UserId);
+                update.Wait();
+            }
+            catch (AggregateException ex)
+            {
+                foreach (Exception exception in ex.InnerExceptions)
+                {
+                    if (exception.GetType() != typeof(UnauthorizedAccessException))
+                    {
+                        throw exception;
+                    }
+                }
+            }
+
+            Assert.That(this.context.Files.Where(f => f.Purpose == id).Count(), Is.EqualTo(0));
         }
 
         [Test]
         public void GetFileTest()
         {
+            // setup file to upload //
+            Stream stream = new MemoryStream(Resources.wookie_image_1);
+            IFormFile file = new FormFile(stream, 0, Resources.wookie_image_1.LongLength, "WookieImage.jpg", "WookieImage.jpg");
 
+            // upload image using file service //
+            var task = this.fileService.Create(file, this.alice.UserId);
+            task.Wait();
+
+            // check that the uploaded file matches the downloaded file //
+            var getTask = this.fileService.Get(task.Result.FileId);
+            getTask.Wait();
+            Assert.That(getTask.Result.FileContents, Is.EqualTo(Resources.wookie_image_1));
         }
 
         [Test]
@@ -210,7 +252,9 @@
         [TearDown]
         public void TearDown()
         {
-
+            this.context.Remove(this.bob);
+            this.context.Remove(this.alice);
+            this.context.SaveChanges();
         }
     }
 }
