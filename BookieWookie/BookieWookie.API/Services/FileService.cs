@@ -71,7 +71,6 @@
         /// Initialize file service with dependency injection.
         /// </summary>
         /// <param name="_hostingEnvironment">Hosting enviroment so files can be saved.</param>
-        /// <param name="_configuration">Inject configuration settings.</param>
         /// <param name="_context">Inject db context for entity framework.</param>
         public FileService(
             IWebHostEnvironment _hostingEnvironment, 
