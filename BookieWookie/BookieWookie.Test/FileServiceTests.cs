@@ -1,6 +1,7 @@
 ﻿namespace BookieWookie.Test
 {
     using BookieWookie.API.Entities;
+    using BookieWookie.API.Models;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -67,7 +68,7 @@
         /// Upload a file from resources and check that it does into the correct loction.
         /// </summary>
         [Test]
-        public void UploadImageTest ()
+        public void CreateImageTest()
         {
             var uploadFolder = new DirectoryInfo(
                 Path.Join(this.webHostEnvironment.Object.ContentRootPath, "uploads"));
@@ -76,6 +77,8 @@
             int recordCount = this.context.Files.Count();
             Stream stream = new MemoryStream(Resources.wookie_image_1);
             IFormFile file = new FormFile(stream, 0, Resources.wookie_image_1.LongLength, "WookieImage.jpg", "WookieImage.jpg");
+            
+            // upload image using file service //
             var task = this.fileService.Create(file, this.bob.UserId);
             task.Wait();
 
@@ -84,6 +87,57 @@
             
             // check that file was added //
             Assert.That(fileCount + 1, Is.EqualTo(uploadFolder.GetFiles().Length));
+        }
+
+        /// <summary>
+        /// Test that update method correctly assigns a catagory.
+        /// </summary>
+        [Test]
+        public void UpdateOwnFileTest()
+        {
+            // setup file to upload //
+            Stream stream = new MemoryStream(Resources.wookie_image_1);
+            IFormFile file = new FormFile(stream, 0, Resources.wookie_image_1.LongLength, "WookieImage.jpg", "WookieImage.jpg");
+
+            // upload image using file service //
+            var task = this.fileService.Create(file, this.bob.UserId);
+            task.Wait();
+
+            string id = Guid.NewGuid().ToString();
+            var updateFileRequest = new UpdateFileRequest()
+            {
+                FileId = task.Result.FileId,
+                Purpose = id,
+            };
+
+            var update = this.fileService.Update(updateFileRequest, this.bob.UserId);
+            update.Wait();
+
+            Assert.That(this.context.Files.Where(f => f.Purpose == id).Count(), Is.EqualTo(1));
+        }
+
+        [Test]
+        public void UpdateOthersFileTest()
+        {
+
+        }
+
+        [Test]
+        public void GetFileTest()
+        {
+
+        }
+
+        [Test]
+        public void DeleteOwnFileTest()
+        {
+
+        }
+
+        [Test]
+        public void DeleteOthersFileTest()
+        {
+
         }
 
         [TearDown]
