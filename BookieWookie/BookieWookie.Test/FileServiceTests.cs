@@ -47,7 +47,7 @@
             };
             this.context.Users.Add(user);
             this.context.SaveChanges();
-            this.bob = this.context.Users.Single(u => u.Username == user.Username);
+            this.alice = this.context.Users.Single(u => u.Username == user.Username);
 
             // user that cannot publish (skip salting and hashing for test speed)//
             user = new User()
@@ -61,7 +61,7 @@
             };
             this.context.Users.Add(user);
             this.context.SaveChanges();
-            this.alice = this.context.Users.Single(u => u.Username == user.Username);
+            this.bob = this.context.Users.Single(u => u.Username == user.Username);
         }
 
         /// <summary>
@@ -79,7 +79,7 @@
             IFormFile file = new FormFile(stream, 0, Resources.wookie_image_1.LongLength, "WookieImage.jpg", "WookieImage.jpg");
             
             // upload image using file service //
-            var task = this.fileService.Create(file, this.bob.UserId);
+            var task = this.fileService.Create(file, this.alice.UserId);
             task.Wait();
 
             // check that record was added //
@@ -100,7 +100,7 @@
             IFormFile file = new FormFile(stream, 0, Resources.wookie_image_1.LongLength, "WookieImage.jpg", "WookieImage.jpg");
 
             // upload image using file service //
-            var task = this.fileService.Create(file, this.bob.UserId);
+            var task = this.fileService.Create(file, this.alice.UserId);
             task.Wait();
 
             string id = Guid.NewGuid().ToString();
@@ -110,7 +110,7 @@
                 Purpose = id,
             };
 
-            var update = this.fileService.Update(updateFileRequest, this.bob.UserId);
+            var update = this.fileService.Update(updateFileRequest, this.alice.UserId);
             update.Wait();
 
             Assert.That(this.context.Files.Where(f => f.Purpose == id).Count(), Is.EqualTo(1));
@@ -131,13 +131,80 @@
         [Test]
         public void DeleteOwnFileTest()
         {
+            // setup file to upload //
+            Stream stream = new MemoryStream(Resources.wookie_image_1);
+            IFormFile file = new FormFile(stream, 0, Resources.wookie_image_1.LongLength, "WookieImage.jpg", "WookieImage.jpg");
 
+            // upload image using file service //
+            var task = this.fileService.Create(file, this.alice.UserId);
+            task.Wait();
+
+            // check files and records //
+            int fileCountBefore = this.context.Files
+                .Where(f => f.FileId == task.Result.FileId)
+                .Count();
+            bool before = System.IO.File.Exists(task.Result.Path);
+
+            // delete file with service //
+            var delete = this.fileService.Delete(task.Result.FileId, this.alice.UserId);
+            delete.Wait();
+            
+            // check files and records //
+            bool after = System.IO.File.Exists(task.Result.Path);
+            int fileCountAfter = this.context.Files
+                .Where(f => f.FileId == task.Result.FileId)
+                .Count();
+
+            // ensure file and record were deleted //
+            Assert.That(before, Is.True);
+            Assert.That(after, Is.False);
+            Assert.That(fileCountBefore - 1, Is.EqualTo(fileCountAfter));
         }
 
         [Test]
         public void DeleteOthersFileTest()
         {
+            // setup file to upload //
+            Stream stream = new MemoryStream(Resources.wookie_image_1);
+            IFormFile file = new FormFile(stream, 0, Resources.wookie_image_1.LongLength, "WookieImage.jpg", "WookieImage.jpg");
 
+            // upload image using file service //
+            var task = this.fileService.Create(file, this.alice.UserId);
+            task.Wait();
+
+            // check files and records //
+            int fileCountBefore = this.context.Files
+                .Where(f => f.FileId == task.Result.FileId)
+                .Count();
+            bool before = System.IO.File.Exists(task.Result.Path);
+
+            try
+            {
+                // delete file with service //
+                var delete = this.fileService.Delete(task.Result.FileId, this.bob.UserId);
+                delete.Wait();
+            }
+            catch (AggregateException ex)
+            {
+                foreach (Exception exception in ex.InnerExceptions)
+                {
+                    if (exception.GetType() != typeof(UnauthorizedAccessException))
+                    {
+                        throw exception;
+                    }
+                }
+            }
+
+            // check files and records //
+            bool after = System.IO.File.Exists(task.Result.Path);
+            int fileCountAfter = this.context.Files
+                .Where(f => f.FileId == task.Result.FileId)
+                .Count();
+
+            // ensure file and record were deleted //
+            Assert.That(before, Is.True);
+            Assert.That(after, Is.True);
+            Assert.That(fileCountBefore, Is.EqualTo(fileCountAfter));
         }
 
         [TearDown]
