@@ -256,17 +256,15 @@
             this.context.Remove(this.alice);
             this.context.SaveChanges();
 
-            string folder = Path.Join(this.webHostEnvironment.Object.ContentRootPath, "uploads");
-            foreach (var file in new DirectoryInfo(folder).GetFiles())
+            foreach (var file in this.context.Files)
             {
-                try
+                var fileInfo = new FileInfo(file.Path);
+                if (fileInfo.Exists == false)
                 {
-                    file.Delete();
+                    continue;
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.Message);
-                }
+
+                fileInfo.Delete();
             }
         }
     }
