@@ -72,7 +72,7 @@
         {
             var uploadFolder = new DirectoryInfo(
                 Path.Join(this.webHostEnvironment.Object.ContentRootPath, "uploads"));
-            int fileCount = uploadFolder.GetFiles().Length;
+            int fileCount = uploadFolder.Exists ? uploadFolder.GetFiles().Length : 0;
 
             int recordCount = this.context.Files.Count();
             Stream stream = new MemoryStream(Resources.wookie_image_1);
@@ -255,6 +255,19 @@
             this.context.Remove(this.bob);
             this.context.Remove(this.alice);
             this.context.SaveChanges();
+
+            string folder = Path.Join(this.webHostEnvironment.Object.ContentRootPath, "uploads");
+            foreach (var file in new DirectoryInfo(folder).GetFiles())
+            {
+                try
+                {
+                    file.Delete();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+            }
         }
     }
 }
