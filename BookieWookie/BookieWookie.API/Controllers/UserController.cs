@@ -11,7 +11,7 @@
     /// </summary>
     [ApiController]
     [Route("[controller]")]
-    public class UserController : ControllerBase
+    public class UserController : BaseController
     {
         private IUserService _userService;
 
@@ -101,7 +101,7 @@
             Entities.User user;
             try
             {
-                int userId = this.ParseUserIdFromContext();
+                int userId = this.ParseUserIdFromContext;
                 user = _userService.UpdateUser(model, userId);
             }
             catch (AuthenticationException ex)
@@ -124,8 +124,7 @@
             Entities.User model;
             try
             {
-                int userId = this.ParseUserIdFromContext();
-                model = _userService.DeleteUser(id, userId);
+                model = _userService.DeleteUser(id, this.ParseUserIdFromContext);
             }
             catch (AuthenticationException ex)
             {

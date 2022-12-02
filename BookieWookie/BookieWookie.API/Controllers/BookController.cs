@@ -14,7 +14,7 @@ namespace BookieWookie.API.Controllers
     /// </summary>
     [ApiController]
     [Route("[controller]")]
-    public class BookController : ControllerBase
+    public class BookController : BaseController
     {
         private IUserService _userService;
         private IBookService _bookService;
@@ -67,7 +67,7 @@ namespace BookieWookie.API.Controllers
             Book book;
             try
             {
-                int userId = this.ParseUserIdFromContext();
+                int userId = this.ParseUserIdFromContext;
                 book = await _bookService.Create(model, userId);
             }
             catch (AuthenticationException ex)
@@ -89,7 +89,7 @@ namespace BookieWookie.API.Controllers
         {
             try
             {
-                int userId = this.ParseUserIdFromContext();
+                int userId = this.ParseUserIdFromContext;
                 book = await _bookService.Update(book, userId);
             }
             catch (UnauthorizedAccessException ex)
@@ -116,7 +116,7 @@ namespace BookieWookie.API.Controllers
             Book book;
             try
             {
-                int userId = this.ParseUserIdFromContext();
+                int userId = this.ParseUserIdFromContext;
                 book = await _bookService.Delete(bookId, userId);
             }
             catch (UnauthorizedAccessException ex)

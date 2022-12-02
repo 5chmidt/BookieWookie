@@ -11,7 +11,7 @@ namespace BookieWookie.API.Controllers
     /// </summary>
     [ApiController]
     [Route("[controller]")]
-    public class FileController : ControllerBase
+    public class FileController : BaseController
     {
         private IConfiguration _configuration;
 
@@ -40,7 +40,7 @@ namespace BookieWookie.API.Controllers
             try
             {
                 Entities.File fileEntity = new();
-                int userId = this.ParseUserIdFromContext();
+                int userId = this.ParseUserIdFromContext;
                 fileEntity = await _fileService.Create(file, userId);
                 return Ok(fileEntity);
             }
@@ -75,7 +75,7 @@ namespace BookieWookie.API.Controllers
         {
             try
             {
-                int userId = this.ParseUserIdFromContext();
+                int userId = this.ParseUserIdFromContext;
                 FileContentResult file = await _fileService.Get(fileId);
                 return file;
             }
@@ -96,7 +96,7 @@ namespace BookieWookie.API.Controllers
         {
             try
             {
-                int userId = this.ParseUserIdFromContext();
+                int userId = this.ParseUserIdFromContext;
                 Entities.File file = await _fileService.Update(fileRequest, userId);
                 return Ok(file);
             }
@@ -117,7 +117,7 @@ namespace BookieWookie.API.Controllers
         {
             try
             {
-                int userId = this.ParseUserIdFromContext();
+                int userId = this.ParseUserIdFromContext;
                 var file = await _fileService.Delete(fileId, userId);
                 return Ok(file);
             }
