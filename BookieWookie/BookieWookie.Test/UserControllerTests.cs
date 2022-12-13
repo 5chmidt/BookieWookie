@@ -2,9 +2,11 @@
 {
     using BookieWookie.API.Entities;
     using BookieWookie.API.Models;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
+    using Moq;
     using NUnit.Framework;
     using NUnit.Framework.Internal;
 
@@ -18,6 +20,7 @@
         IConfiguration configuration;
         User bob;
         string bobPassword;
+        JWTTokenResponse bobToken;
 
         [SetUp]
         public void Setup()
@@ -43,7 +46,7 @@
             };
 
             this.bobPassword = user.Password;
-            this.userService.CreateUser(user);
+            this.bobToken = this.userService.CreateUser(user);
             this.bob = this.context.Users.Single(u => u.Username == user.Username);
         }
 
